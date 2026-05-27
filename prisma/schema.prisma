@@ -1,0 +1,114 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Payroll Upload ───────────────────────────────────────────────────────────
+// Tracks each CSV file uploaded by the admin.
+model PayrollUpload {
+  id        String         @id @default(cuid())
+  fileName  String
+  month     Int // 1–12
+  year      Int
+  totalRows Int
+  validRows Int
+  status    UploadStatus   @default(DONE)
+  createdAt DateTime       @default(now())
+
+  records SalaryRecord[]
+
+  @@index([year, month])
+}
+
+// ─── Salary Record ────────────────────────────────────────────────────────────
+// One row per employee per upload. Snapshot of salary values at upload time.
+model SalaryRecord {
+  id           String        @id @default(cuid())
+  uploadId     String
+  upload       PayrollUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  employeeCode String
+  name         String
+  email        String
+  designation  String
+
+  month      Int
+  year       Int
+  baseSalary Float
+  hra        Float @default(0)
+  allowances Float @default(0)
+  deductions Float @default(0)
+  grossSalary Float // baseSalary + hra + allowances
+  netSalary   Float // grossSalary - deductions
+
+  createdAt  DateTime    @default(now())
+  salarySlip SalarySlip?
+
+  // One employee can only appear once per upload
+  @@unique([uploadId, employeeCode])
+  @@index([month, year])
+  @@index([employeeCode])
+}
+
+// ─── Salary Slip ──────────────────────────────────────────────────────────────
+// A generated PDF salary slip for one SalaryRecord.
+model SalarySlip {
+  id       String @id @default(cuid())
+  recordId String @unique
+
+  record SalaryRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  // PDF stored as base64 text. Avoids needing external storage for MVP.
+  pdfBase64 String? @db.Text
+  status    SlipStatus @default(GENERATED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  emailLogs EmailLog[]
+}
+
+// ─── Email Log ────────────────────────────────────────────────────────────────
+// Tracks every email dispatch attempt (success or failure).
+model EmailLog {
+  id     String @id @default(cuid())
+  slipId String
+  slip   SalarySlip @relation(fields: [slipId], references: [id], onDelete: Cascade)
+
+  sentTo    String
+  status    EmailStatus @default(PENDING)
+  errorMsg  String?
+  sentAt    DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([slipId])
+  @@index([status])
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum SlipStatus {
+  GENERATED
+  EMAILED
+  FAILED
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
