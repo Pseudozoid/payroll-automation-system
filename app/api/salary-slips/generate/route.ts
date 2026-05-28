@@ -26,8 +26,8 @@ export async function POST(req: Request) {
       throw new AppError("This upload has no records.", 400);
     }
 
-    const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Company";
-    const companyAddress = process.env.COMPANY_ADDRESS;
+    const companyName = pdfSettings.companyName ?? process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Company";
+    const companyAddress = pdfSettings.companyAddress ?? process.env.COMPANY_ADDRESS ?? undefined;
 
     const results = { success: 0, failed: 0, errors: [] as string[] };
 

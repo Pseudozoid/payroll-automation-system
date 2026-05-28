@@ -5,6 +5,7 @@ import { CircleCheckBig, RotateCcw, Settings2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   DEFAULT_PDF_SETTINGS,
   loadPdfSettings,
@@ -126,6 +127,29 @@ export default function SettingsPage() {
               These preferences are stored in your browser and only affect newly generated PDFs.
             </p>
           </div>
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Branding"
+          description="Set company name and address that appear on generated PDFs. These values are stored in your browser by default."
+        />
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Input
+            label="Company name"
+            value={settings.companyName ?? ""}
+            onChange={(e) => updateField("companyName", e.target.value)}
+            placeholder={process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Company"}
+          />
+
+          <Input
+            label="Company address"
+            value={settings.companyAddress ?? ""}
+            onChange={(e) => updateField("companyAddress", e.target.value)}
+            placeholder="Street, City, State, Country"
+          />
         </div>
       </Card>
 
