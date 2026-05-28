@@ -5,17 +5,26 @@ import { handleApiError, AppError } from "@/lib/api-error";
 import { sendSlipEmail } from "@/lib/email";
 import { formatMonth } from "@/lib/utils";
 
-const schema = z.object({ uploadId: z.string().min(1) });
+const schema = z.object({ uploadId: z.string().min(1), retryFailedOnly: z.boolean().optional() });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { uploadId } = schema.parse(body);
+    const { uploadId, retryFailedOnly } = schema.parse(body);
 
-    // Fetch all records for the upload, including their salary slips
+    // Fetch all records for the upload, including their salary slips and latest email log
     const records = await prisma.salaryRecord.findMany({
       where: { uploadId },
-      include: { salarySlip: true },
+      include: {
+        salarySlip: {
+          include: {
+            emailLogs: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+            },
+          },
+        },
+      },
       orderBy: { employeeCode: "asc" },
     });
 
@@ -32,6 +41,16 @@ export async function POST(req: Request) {
       if (!slip || !slip.pdfBase64) {
         results.skipped++;
         continue;
+      }
+
+      // If caller requested retrying only failed deliveries, skip records whose latest log isn't FAILED
+      if (retryFailedOnly) {
+        const latestLog = slip.emailLogs?.[0];
+        if (!latestLog || latestLog.status !== "FAILED") {
+          // nothing to retry for this record
+          results.skipped++;
+          continue;
+        }
       }
 
       const pdfFileName = `salary-slip-${record.employeeCode}-${record.month}-${record.year}.pdf`;

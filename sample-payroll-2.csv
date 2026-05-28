@@ -1,0 +1,9 @@
+employee_id,name,email,designation,base_salary,hra,allowances,deductions,month,year
+EMP101,Sneha Rao,sneha.rao@example.com,Backend Engineer,68000,13600,6000,3500,4,2026
+EMP102,Vikram Iyer,vikram.iyer@example.com,Frontend Engineer,64000,12800,5500,3000,4,2026
+EMP103,Priyanka Joshi,priyanka.joshi@example.com,Data Analyst,59000,11800,4800,2200,4,2026
+EMP104,Arjun Mehta,arjun.mehta@example.com,DevOps Engineer,72000,14400,7000,4000,4,2026
+EMP105,Nivedita Roy,nivedita.roy@example.com,Product Designer,61000,12200,5200,2700,4,2026
+EMP106,Sachin Kulkarni,sachin.kulkarni@example.com,Support Lead,47000,9400,3000,1500,4,2026
+EMP107,Trisha Banerjee,trisha.banerjee@example.com,HR Manager,53000,10600,4200,2500,4,2026
+EMP108,Manish Kapoor,manish.kapoor@example.com,Finance Manager,80000,16000,8000,5000,4,2026
