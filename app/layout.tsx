@@ -9,11 +9,11 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s — PaySlip Pro",
-    default: "PaySlip Pro — Salary Slip Automation",
+    template: "%s — Payroll Automation System",
+    default: "Payroll Automation System",
   },
   description:
-    "Admin dashboard for generating and dispatching employee salary slips via email.",
+    "Admin dashboard for generating and dispatching employee payroll slips via email.",
 };
 
 export default function RootLayout({
