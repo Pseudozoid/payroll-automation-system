@@ -3,13 +3,21 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, AppError } from "@/lib/api-error";
 import { generateSalarySlipPdf } from "@/lib/pdf";
+import { parsePdfSettings } from "@/lib/pdf-settings";
 
-const schema = z.object({ uploadId: z.string().min(1) });
+const schema = z.object({
+  uploadId: z.string().min(1),
+  settings: z.unknown().optional(),
+});
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { uploadId } = schema.parse(body);
+    const { uploadId, settings } = schema.parse(body);
+    const pdfSettings = parsePdfSettings(settings);
+    // Debug: log received settings to server console to verify changes are applied
+    // (temporary; will remove after verification)
+    console.debug("[api/salary-slips/generate] pdfSettings:", pdfSettings);
 
     const upload = await prisma.payrollUpload.findUnique({
       where: { id: uploadId },
@@ -48,7 +56,7 @@ export async function POST(req: Request) {
           deductions: record.deductions,
           grossSalary: record.grossSalary,
           netSalary: record.netSalary,
-        });
+        }, pdfSettings);
 
         const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
 

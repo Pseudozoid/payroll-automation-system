@@ -8,6 +8,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/":        "Dashboard",
   "/upload":  "Upload Payroll",
   "/history": "History",
+  "/settings": "Settings",
 };
 
 function getBreadcrumb(pathname: string): string {

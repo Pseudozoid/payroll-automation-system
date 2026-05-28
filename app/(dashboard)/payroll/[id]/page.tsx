@@ -24,6 +24,7 @@ import { SlipStatusBadge } from "@/components/shared/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatINR, formatMonth, formatDateTime } from "@/lib/utils";
 import type { PayrollUpload, SalaryRecord, GenerateResult, DispatchResult } from "@/types";
+import { loadPdfSettings } from "@/lib/pdf-settings";
 
 interface UploadWithRecords extends PayrollUpload {
   records: (SalaryRecord & {
@@ -84,10 +85,12 @@ export default function PayrollDetailPage() {
   async function handleGenerate() {
     setGenerateState({ state: "loading" });
     try {
+      const settings = loadPdfSettings();
+      console.debug("[generate] using PDF settings:", settings);
       const res = await fetch("/api/salary-slips/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uploadId: id }),
+        body: JSON.stringify({ uploadId: id, settings }),
       });
       const data: GenerateResult = await res.json();
       setGenerateState({ state: "done", result: data });

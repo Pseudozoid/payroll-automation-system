@@ -10,6 +10,7 @@ import {
   LogOut,
   Banknote,
   ChevronRight,
+  SlidersHorizontal,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ export function Sidebar() {
     { href: dashboardHref, label: "Dashboard", icon: LayoutDashboard },
     { href: "/upload", label: "Upload Payroll", icon: Upload },
     { href: "/history", label: "History", icon: History },
+    { href: "/settings", label: "Settings", icon: SlidersHorizontal },
   ];
 
   async function handleLogout() {

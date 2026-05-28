@@ -8,6 +8,7 @@
 
 import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib";
 import { formatMonth, formatDate } from "./utils";
+import { DEFAULT_PDF_SETTINGS, type PdfSettings } from "./pdf-settings";
 
 type RGBColor = ReturnType<typeof rgb>;
 
@@ -27,6 +28,8 @@ export interface SalarySlipPdfData {
   grossSalary: number;
   netSalary: number;
 }
+
+export type SalarySlipPdfOptions = PdfSettings;
 
 // ─── Color palette ──────────────────────────────────────────────────────────────
 
@@ -108,15 +111,22 @@ function drawTableRow(
 
 // ─── Main export ────────────────────────────────────────────────────────────────
 
-export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Uint8Array> {
+export async function generateSalarySlipPdf(
+  data: SalarySlipPdfData,
+  settings: PdfSettings = DEFAULT_PDF_SETTINGS
+): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  const page = doc.addPage([595.28, 841.89]); // A4
+  const pageSize = settings.pageSize === "Letter" ? ([612, 792] as const) : ([595.28, 841.89] as const);
+  const size = settings.orientation === "landscape"
+    ? ([pageSize[1], pageSize[0]] as const)
+    : pageSize;
+  const page = doc.addPage(size);
   const { width, height } = page.getSize();
 
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold    = await doc.embedFont(StandardFonts.HelveticaBold);
 
-  const margin = 50;
+  const margin = settings.margin;
   const cw = width - margin * 2; // content width
   const rowH = 24;
 
@@ -128,7 +138,7 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
     x: margin, y: height - 36, size: 18, font: bold, color: C.white,
   });
 
-  if (data.companyAddress) {
+  if (settings.showCompanyAddress && data.companyAddress) {
     page.drawText(data.companyAddress, {
       x: margin, y: height - 54, size: 8.5, font: regular, color: rgb(0.76, 0.78, 0.98),
     });
@@ -252,11 +262,13 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
     thickness: 0.5, color: C.border,
   });
 
-  const footerText =
-    `Generated on ${formatDate(new Date())}  ·  This is a computer-generated document. No signature is required.`;
-  page.drawText(footerText, {
-    x: margin, y: 35, size: 7, font: regular, color: C.gray,
-  });
+  if (settings.showFooterNote) {
+    const footerText =
+      `Generated on ${formatDate(new Date())}  ·  This is a computer-generated document. No signature is required.`;
+    page.drawText(footerText, {
+      x: margin, y: 35, size: 7, font: regular, color: C.gray,
+    });
+  }
 
   return doc.save();
 }
