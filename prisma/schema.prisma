@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Connection URL is configured in prisma.config.ts via DATABASE_URL env var
 }
 
 // ─── Payroll Upload ───────────────────────────────────────────────────────────
