@@ -202,8 +202,8 @@ export async function generateSalarySlipPdf(
   const headerH = isLandscape ? 82 : 92;
   const detailsCardH = isLandscape ? 84 : 92;
   const earningsCardH = isLandscape ? 136 : 146;
-  const deductionsCardH = isLandscape ? 68 : 76;
-  const netBoxH = isLandscape ? 76 : 88;
+  const deductionsCardH = isLandscape ? 64 : 76;
+  const netBoxH = isLandscape ? 60 : 88;
   let y = height - margin;
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
@@ -465,8 +465,8 @@ export async function generateSalarySlipPdf(
   y = deductionsCardY - sectionGap;
 
   // ── NET SALARY ───────────────────────────────────────────────────────────────
-  const footerReserveTop = footerY + (settings.showFooterNote ? 28 : 18);
-  const netBoxY = Math.max(y - netBoxH + 4, footerReserveTop + 10);
+  const footerReserveTop = footerY + (settings.showFooterNote ? 24 : 16);
+  const netBoxY = Math.max(y - netBoxH + 4, footerReserveTop + 8);
   page.drawRectangle({
     x: contentLeft,
     y: netBoxY,
@@ -480,22 +480,22 @@ export async function generateSalarySlipPdf(
 
   page.drawText("NET SALARY", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 22,
-    size: isLandscape ? 7.8 : 8,
+    y: netBoxY + netBoxH - 18,
+    size: isLandscape ? 7.2 : 8,
     font: bold,
     color: C.gray,
   });
   page.drawText("Take-home pay", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 35,
-    size: isLandscape ? 7 : 7.2,
+    y: netBoxY + netBoxH - 30,
+    size: isLandscape ? 6.7 : 7.2,
     font: regular,
     color: C.gray,
   });
   page.drawText(formatInrForPdf(data.netSalary), {
     x: contentLeft + 18,
-    y: netBoxY + 18,
-    size: isLandscape ? 23 : 26,
+    y: netBoxY + 14,
+    size: isLandscape ? 19.5 : 26,
     font: bold,
     color: C.success,
   });
@@ -504,8 +504,8 @@ export async function generateSalarySlipPdf(
   const noteW = regular.widthOfTextAtSize(takeHomeNote, 8.3);
   page.drawText(takeHomeNote, {
     x: contentRight - 18 - noteW,
-    y: netBoxY + 22,
-    size: isLandscape ? 7.8 : 8.3,
+    y: netBoxY + 16,
+    size: isLandscape ? 7.1 : 8.3,
     font: regular,
     color: C.gray,
   });
