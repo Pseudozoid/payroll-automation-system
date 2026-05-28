@@ -52,10 +52,69 @@ const PDF_INR_FORMATTER = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 2,
 });
 
+const PAGE = {
+  outerMargin: 48,
+  sectionGap: 14,
+  blockGap: 12,
+  rowHeight: 28,
+};
+
 function formatInrForPdf(amount: number): string {
   // Standard Helvetica/WinAnsi in pdf-lib cannot encode the rupee symbol.
   // Keep PDF text ASCII-safe to avoid runtime encoding errors.
   return `INR ${PDF_INR_FORMATTER.format(amount)}`;
+}
+
+function drawWrappedText(
+  page: PDFPage,
+  text: string,
+  x: number,
+  y: number,
+  options: {
+    size: number;
+    font: PDFFont;
+    color: RGBColor;
+    maxWidth: number;
+    lineHeight?: number;
+  }
+): void {
+  page.drawText(text, {
+    x,
+    y,
+    size: options.size,
+    font: options.font,
+    color: options.color,
+    maxWidth: options.maxWidth,
+    lineHeight: options.lineHeight ?? options.size + 3,
+  });
+}
+
+function drawSectionHeading(
+  page: PDFPage,
+  x: number,
+  y: number,
+  title: string,
+  subtitle: string,
+  bold: PDFFont,
+  regular: PDFFont,
+  accentColor: RGBColor = C.primary
+): number {
+  page.drawRectangle({ x, y: y + 1, width: 18, height: 3, color: accentColor });
+  page.drawText(title, {
+    x: x + 24,
+    y,
+    size: 9,
+    font: bold,
+    color: C.dark,
+  });
+  page.drawText(subtitle, {
+    x: x + 24,
+    y: y - 11,
+    size: 7.25,
+    font: regular,
+    color: C.gray,
+  });
+  return y - 24;
 }
 
 // ─── Helper functions ───────────────────────────────────────────────────────────
@@ -67,13 +126,18 @@ function drawLabelValue(
   x: number,
   y: number,
   label: string,
-  value: string
+  value: string,
+  maxWidth: number
 ): void {
   page.drawText(label.toUpperCase(), {
-    x, y: y + 12, size: 7, font: regular, color: C.gray,
+    x, y: y + 13, size: 6.8, font: regular, color: C.gray,
   });
-  page.drawText(value || "—", {
-    x, y, size: 10, font: bold, color: C.dark,
+  drawWrappedText(page, value || "—", x, y - 1, {
+    size: 10.25,
+    font: bold,
+    color: C.dark,
+    maxWidth,
+    lineHeight: 12,
   });
 }
 
@@ -97,15 +161,15 @@ function drawTableRow(
   page.drawLine({
     start: { x, y: y - rowHeight },
     end: { x: x + width, y: y - rowHeight },
-    thickness: 0.5,
+    thickness: 0.4,
     color: C.border,
   });
   page.drawText(label, {
-    x: x + 12, y: y - rowHeight + 8, size: 9, font: labelFont, color: labelColor,
+    x: x + 14, y: y - rowHeight + 9, size: 8.8, font: labelFont, color: labelColor,
   });
   const valW = valueFont.widthOfTextAtSize(value, 9);
   page.drawText(value, {
-    x: x + width - 14 - valW, y: y - rowHeight + 8, size: 9, font: valueFont, color: valueColor,
+    x: x + width - 14 - valW, y: y - rowHeight + 9, size: 8.8, font: valueFont, color: valueColor,
   });
 }
 
@@ -127,146 +191,336 @@ export async function generateSalarySlipPdf(
   const bold    = await doc.embedFont(StandardFonts.HelveticaBold);
 
   const margin = settings.margin;
-  const cw = width - margin * 2; // content width
-  const rowH = 24;
+  const cw = width - margin * 2;
+  const contentLeft = margin;
+  const contentRight = margin + cw;
+  const rowH = PAGE.rowHeight;
+  let y = height - margin;
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
-  const headerH = 88;
-  page.drawRectangle({ x: 0, y: height - headerH, width, height: headerH, color: C.primary });
+  const headerH = 92;
+  const headerBottom = y - headerH;
+  page.drawRectangle({
+    x: contentLeft,
+    y: headerBottom,
+    width: cw,
+    height: headerH,
+    color: C.grayLight,
+    borderColor: C.border,
+    borderWidth: 1,
+  });
+  page.drawRectangle({ x: contentLeft, y: y - 4, width: cw, height: 4, color: C.primary });
 
-  page.drawText(data.companyName, {
-    x: margin, y: height - 36, size: 18, font: bold, color: C.white,
+  const headerPad = 16;
+  const leftX = contentLeft + headerPad;
+  const leftMaxWidth = cw * 0.54;
+  const rightWidth = cw * 0.34;
+  const rightX = contentRight - headerPad - rightWidth;
+
+  drawWrappedText(page, data.companyName, leftX, y - 28, {
+    size: 19,
+    font: bold,
+    color: C.dark,
+    maxWidth: leftMaxWidth,
+    lineHeight: 20,
   });
 
   if (settings.showCompanyAddress && data.companyAddress) {
-    page.drawText(data.companyAddress, {
-      x: margin, y: height - 54, size: 8.5, font: regular, color: rgb(0.76, 0.78, 0.98),
+    drawWrappedText(page, data.companyAddress, leftX, y - 50, {
+      size: 8.3,
+      font: regular,
+      color: C.gray,
+      maxWidth: leftMaxWidth,
+      lineHeight: 11,
     });
   }
 
+  page.drawText("PAYROLL DOCUMENT", {
+    x: leftX,
+    y: headerBottom + 18,
+    size: 7.5,
+    font: regular,
+    color: C.gray,
+  });
+
   page.drawText("SALARY SLIP", {
-    x: margin, y: height - 72, size: 8, font: bold,
-    color: rgb(0.76, 0.78, 0.98),
+    x: rightX,
+    y: y - 26,
+    size: 22,
+    font: bold,
+    color: C.dark,
   });
 
-  // Period label (right-aligned)
   const period = formatMonth(data.month, data.year);
-  const periodW = bold.widthOfTextAtSize(period, 14);
-  page.drawText(period, {
-    x: width - margin - periodW, y: height - 38, size: 14, font: bold, color: C.white,
+  const pillW = Math.max(102, bold.widthOfTextAtSize(period, 11) + 22);
+  const pillX = contentRight - headerPad - pillW;
+  const pillY = headerBottom + 18;
+  page.drawRectangle({
+    x: pillX,
+    y: pillY,
+    width: pillW,
+    height: 24,
+    color: C.primaryLight,
+    borderColor: C.border,
+    borderWidth: 0.6,
   });
-  page.drawText("Pay Period", {
-    x: width - margin - bold.widthOfTextAtSize("Pay Period", 8), y: height - 56,
-    size: 8, font: regular, color: rgb(0.76, 0.78, 0.98),
+  page.drawText(period, {
+    x: pillX + 11,
+    y: pillY + 8,
+    size: 10.5,
+    font: bold,
+    color: C.primary,
+  });
+  page.drawText("Pay period", {
+    x: pillX,
+    y: pillY + 29,
+    size: 7.2,
+    font: regular,
+    color: C.gray,
   });
 
-  let y = height - headerH - 18;
+  y = headerBottom - 18;
 
   // ── EMPLOYEE DETAILS ────────────────────────────────────────────────────────
-  const infoH = 82;
-  page.drawRectangle({ x: margin, y: y - infoH, width: cw, height: infoH, color: C.grayLight });
-  page.drawRectangle({ x: margin, y: y - infoH, width: 4, height: infoH, color: C.primary });
+  const detailsTitleY = y;
+  y = drawSectionHeading(page, contentLeft, detailsTitleY, "Employee details", "Employee identity and contact information", bold, regular, C.primary);
+  const detailsCardH = 92;
+  const detailsCardY = y - detailsCardH + 6;
+  page.drawRectangle({
+    x: contentLeft,
+    y: detailsCardY,
+    width: cw,
+    height: detailsCardH,
+    color: C.white,
+    borderColor: C.border,
+    borderWidth: 0.8,
+  });
+  page.drawRectangle({ x: contentLeft, y: detailsCardY + detailsCardH - 4, width: cw, height: 4, color: C.primaryLight });
 
-  page.drawText("EMPLOYEE DETAILS", {
-    x: margin + 16, y: y - 16, size: 7.5, font: bold, color: C.gray,
+  const halfW = cw / 2;
+  const cellPadX = 16;
+  const cellTop1 = detailsCardY + detailsCardH - 20;
+  const cellTop2 = detailsCardY + 34;
+  const cellW = halfW - cellPadX * 2;
+  const leftCellX = contentLeft + cellPadX;
+  const rightCellX = contentLeft + halfW + cellPadX;
+  drawLabelValue(page, regular, bold, leftCellX, cellTop1, "Employee ID", data.employeeCode, cellW);
+  drawLabelValue(page, regular, bold, rightCellX, cellTop1, "Employee Name", data.name, cellW);
+  drawLabelValue(page, regular, bold, leftCellX, cellTop2, "Designation", data.designation, cellW);
+  drawLabelValue(page, regular, bold, rightCellX, cellTop2, "Email Address", data.email, cellW);
+
+  page.drawLine({
+    start: { x: contentLeft + halfW, y: detailsCardY + 10 },
+    end: { x: contentLeft + halfW, y: detailsCardY + detailsCardH - 10 },
+    thickness: 0.5,
+    color: C.border,
+  });
+  page.drawLine({
+    start: { x: contentLeft + 12, y: detailsCardY + detailsCardH / 2 },
+    end: { x: contentRight - 12, y: detailsCardY + detailsCardH / 2 },
+    thickness: 0.45,
+    color: C.border,
   });
 
-  const col2 = margin + cw / 2;
-  drawLabelValue(page, regular, bold, margin + 16, y - 40, "Employee ID", data.employeeCode);
-  drawLabelValue(page, regular, bold, margin + 16, y - 65, "Designation", data.designation);
-  drawLabelValue(page, regular, bold, col2, y - 40, "Employee Name", data.name);
-  drawLabelValue(page, regular, bold, col2, y - 65, "Email Address", data.email);
+  y = detailsCardY - 20;
 
-  y -= infoH + 22;
-
-  // ── EARNINGS TABLE ──────────────────────────────────────────────────────────
-  page.drawText("EARNINGS", { x: margin, y, size: 7.5, font: bold, color: C.gray });
-  y -= 14;
-
-  // Table header
-  page.drawRectangle({ x: margin, y: y - rowH, width: cw, height: rowH, color: C.primary });
-  page.drawText("Description", { x: margin + 12, y: y - rowH + 8, size: 8.5, font: bold, color: C.white });
-  page.drawText("Amount", {
-    x: margin + cw - 14 - bold.widthOfTextAtSize("Amount", 8.5),
-    y: y - rowH + 8, size: 8.5, font: bold, color: C.white,
-  });
-  y -= rowH;
-
+  // ── EARNINGS ────────────────────────────────────────────────────────────────
+  y = drawSectionHeading(page, contentLeft, y, "Earnings", "Earnings breakdown for the current pay period", bold, regular, C.primary);
   const earningRows: [string, number][] = [
     ["Basic Salary", data.baseSalary],
     ["House Rent Allowance (HRA)", data.hra],
     ["Other Allowances", data.allowances],
   ];
+  const earningsCardH = 146;
+  const earningsCardY = y - earningsCardH + 6;
+  page.drawRectangle({
+    x: contentLeft,
+    y: earningsCardY,
+    width: cw,
+    height: earningsCardH,
+    color: C.white,
+    borderColor: C.border,
+    borderWidth: 0.8,
+  });
 
+  const tableHeaderH = 26;
+  page.drawRectangle({
+    x: contentLeft,
+    y: earningsCardY + earningsCardH - tableHeaderH,
+    width: cw,
+    height: tableHeaderH,
+    color: C.dark,
+  });
+  page.drawText("Description", {
+    x: contentLeft + 14,
+    y: earningsCardY + earningsCardH - 18,
+    size: 8.5,
+    font: bold,
+    color: C.white,
+  });
+  page.drawText("Amount", {
+    x: contentRight - 14 - bold.widthOfTextAtSize("Amount", 8.5),
+    y: earningsCardY + earningsCardH - 18,
+    size: 8.5,
+    font: bold,
+    color: C.white,
+  });
+
+  let tableY = earningsCardY + earningsCardH - tableHeaderH;
   earningRows.forEach(([label, amount], idx) => {
     drawTableRow(
-      page, regular, bold, margin, y, cw, rowH,
-      label, formatInrForPdf(amount),
+      page,
+      regular,
+      bold,
+      contentLeft,
+      tableY,
+      cw,
+      rowH,
+      label,
+      formatInrForPdf(amount),
       idx % 2 === 0 ? C.white : C.grayLight
     );
-    y -= rowH;
+    tableY -= rowH;
   });
 
-  // Gross row
   drawTableRow(
-    page, regular, bold, margin, y, cw, rowH,
-    "Gross Salary", formatInrForPdf(data.grossSalary),
-    C.primaryLight, bold, bold, C.primary, C.primary
+    page,
+    regular,
+    bold,
+    contentLeft,
+    tableY,
+    cw,
+    rowH,
+    "Gross Salary",
+    formatInrForPdf(data.grossSalary),
+    C.primaryLight,
+    bold,
+    bold,
+    C.primary,
+    C.primary
   );
-  y -= rowH + 22;
 
-  // ── DEDUCTIONS TABLE ─────────────────────────────────────────────────────────
-  page.drawText("DEDUCTIONS", { x: margin, y, size: 7.5, font: bold, color: C.gray });
-  y -= 14;
+  y = earningsCardY - 20;
 
-  page.drawRectangle({ x: margin, y: y - rowH, width: cw, height: rowH, color: C.danger });
-  page.drawText("Description", { x: margin + 12, y: y - rowH + 8, size: 8.5, font: bold, color: C.white });
+  // ── DEDUCTIONS ──────────────────────────────────────────────────────────────
+  y = drawSectionHeading(page, contentLeft, y, "Deductions", "Statutory and other deductions applied this month", bold, regular, C.danger);
+  const deductionsCardH = 76;
+  const deductionsCardY = y - deductionsCardH + 6;
+  page.drawRectangle({
+    x: contentLeft,
+    y: deductionsCardY,
+    width: cw,
+    height: deductionsCardH,
+    color: C.white,
+    borderColor: C.border,
+    borderWidth: 0.8,
+  });
+
+  page.drawRectangle({
+    x: contentLeft,
+    y: deductionsCardY + deductionsCardH - tableHeaderH,
+    width: cw,
+    height: tableHeaderH,
+    color: C.dark,
+  });
+  page.drawText("Description", {
+    x: contentLeft + 14,
+    y: deductionsCardY + deductionsCardH - 18,
+    size: 8.5,
+    font: bold,
+    color: C.white,
+  });
   page.drawText("Amount", {
-    x: margin + cw - 14 - bold.widthOfTextAtSize("Amount", 8.5),
-    y: y - rowH + 8, size: 8.5, font: bold, color: C.white,
+    x: contentRight - 14 - bold.widthOfTextAtSize("Amount", 8.5),
+    y: deductionsCardY + deductionsCardH - 18,
+    size: 8.5,
+    font: bold,
+    color: C.white,
   });
-  y -= rowH;
 
   drawTableRow(
-    page, regular, bold, margin, y, cw, rowH,
-    "Total Deductions", formatInrForPdf(data.deductions),
-    C.white
+    page,
+    regular,
+    bold,
+    contentLeft,
+    deductionsCardY + deductionsCardH - tableHeaderH,
+    cw,
+    rowH,
+    "Total Deductions",
+    formatInrForPdf(data.deductions),
+    C.white,
+    bold,
+    bold,
+    C.dark,
+    C.dark
   );
-  y -= rowH + 22;
+
+  y = deductionsCardY - 18;
 
   // ── NET SALARY ───────────────────────────────────────────────────────────────
-  const netBoxH = 72;
+  const netBoxH = 88;
+  const netBoxY = y - netBoxH + 4;
   page.drawRectangle({
-    x: margin, y: y - netBoxH, width: cw, height: netBoxH,
-    color: C.successLight, borderColor: C.successBorder, borderWidth: 1,
+    x: contentLeft,
+    y: netBoxY,
+    width: cw,
+    height: netBoxH,
+    color: C.successLight,
+    borderColor: C.successBorder,
+    borderWidth: 1,
   });
-  page.drawRectangle({ x: margin, y: y - netBoxH, width: 4, height: netBoxH, color: C.success });
+  page.drawRectangle({ x: contentLeft, y: netBoxY, width: 6, height: netBoxH, color: C.success });
 
-  page.drawText("NET SALARY — TAKE HOME", {
-    x: margin + 18, y: y - 20, size: 7.5, font: bold, color: C.gray,
+  page.drawText("NET SALARY", {
+    x: contentLeft + 18,
+    y: netBoxY + netBoxH - 24,
+    size: 8,
+    font: bold,
+    color: C.gray,
+  });
+  page.drawText("Take-home pay", {
+    x: contentLeft + 18,
+    y: netBoxY + netBoxH - 38,
+    size: 7.2,
+    font: regular,
+    color: C.gray,
   });
   page.drawText(formatInrForPdf(data.netSalary), {
-    x: margin + 18, y: y - 50, size: 24, font: bold, color: C.success,
+    x: contentLeft + 18,
+    y: netBoxY + 24,
+    size: 26,
+    font: bold,
+    color: C.success,
   });
 
   const takeHomeNote = `For the pay period: ${formatMonth(data.month, data.year)}`;
-  const noteW = regular.widthOfTextAtSize(takeHomeNote, 8.5);
+  const noteW = regular.widthOfTextAtSize(takeHomeNote, 8.3);
   page.drawText(takeHomeNote, {
-    x: margin + cw - 14 - noteW, y: y - 42, size: 8.5, font: regular, color: C.gray,
+    x: contentRight - 18 - noteW,
+    y: netBoxY + 28,
+    size: 8.3,
+    font: regular,
+    color: C.gray,
   });
 
   // ── FOOTER ───────────────────────────────────────────────────────────────────
+  const footerY = 48;
   page.drawLine({
-    start: { x: margin, y: 50 },
-    end: { x: margin + cw, y: 50 },
-    thickness: 0.5, color: C.border,
+    start: { x: contentLeft, y: footerY + 16 },
+    end: { x: contentRight, y: footerY + 16 },
+    thickness: 0.5,
+    color: C.border,
   });
 
   if (settings.showFooterNote) {
     const footerText =
-      `Generated on ${formatDate(new Date())}  ·  This is a computer-generated document. No signature is required.`;
+      `Generated on ${formatDate(new Date())}  ·  This document is computer-generated and does not require a signature.`;
     page.drawText(footerText, {
-      x: margin, y: 35, size: 7, font: regular, color: C.gray,
+      x: contentLeft,
+      y: footerY,
+      size: 7,
+      font: regular,
+      color: C.gray,
     });
   }
 
