@@ -3,25 +3,34 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, AppError } from "@/lib/api-error";
 import { sendSlipEmail } from "@/lib/email";
+import { parsePdfSettings } from "@/lib/pdf-settings";
 
-const schema = z.object({
-  uploadId: z.string().min(1).optional(),
-  recordId: z.string().min(1).optional(),
-  retryFailedOnly: z.boolean().optional(),
-}).refine((value) => value.uploadId || value.recordId, {
-  message: "uploadId or recordId is required",
-});
+const schema = z
+  .object({
+    uploadId: z.string().min(1).optional(),
+    recordId: z.string().min(1).optional(),
+    retryFailedOnly: z.boolean().optional(),
+    settings: z.unknown().optional(),
+  })
+  .refine((value) => value.uploadId || value.recordId, {
+    message: "uploadId or recordId is required",
+  });
 
-async function dispatchEmailForRecord(record: {
-  id: string;
-  employeeCode: string;
-  email: string;
-  name: string;
-  month: number;
-  year: number;
-  netSalary: number;
-  salarySlip: { id: string; pdfBase64: string | null; emailLogs?: { status: string }[] } | null;
-}, results: { sent: number; failed: number; skipped: number; errors: string[] }) {
+async function dispatchEmailForRecord(
+  record: {
+    id: string;
+    employeeCode: string;
+    email: string;
+    name: string;
+    month: number;
+    year: number;
+    netSalary: number;
+    salarySlip: { id: string; pdfBase64: string | null; emailLogs?: { status: string }[] } | null;
+  },
+  companyName: string,
+  companyAddress: string | undefined,
+  results: { sent: number; failed: number; skipped: number; errors: string[] }
+) {
   const slip = record.salarySlip;
 
   if (!slip || !slip.pdfBase64) {
@@ -38,6 +47,8 @@ async function dispatchEmailForRecord(record: {
       month: record.month,
       year: record.year,
       netSalary: record.netSalary,
+      companyName,
+      companyAddress,
       pdfBase64: slip.pdfBase64,
       pdfFileName,
     });
@@ -77,7 +88,10 @@ async function dispatchEmailForRecord(record: {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { uploadId, recordId, retryFailedOnly } = schema.parse(body);
+    const { uploadId, recordId, retryFailedOnly, settings } = schema.parse(body);
+    const pdfSettings = parsePdfSettings(settings);
+    const companyName = pdfSettings.companyName?.trim() || process.env.NEXT_PUBLIC_COMPANY_NAME || "Company";
+    const companyAddress = pdfSettings.companyAddress?.trim() || process.env.COMPANY_ADDRESS || undefined;
 
     const results = { sent: 0, failed: 0, skipped: 0, errors: [] as string[] };
 
@@ -104,11 +118,10 @@ export async function POST(req: Request) {
         throw new AppError("Payroll record does not belong to the specified upload.", 400);
       }
 
-      await dispatchEmailForRecord(record, results);
+      await dispatchEmailForRecord(record, companyName, companyAddress, results);
       return NextResponse.json(results);
     }
 
-    // Fetch all records for the upload, including their salary slips and latest email log
     const records = await prisma.salaryRecord.findMany({
       where: { uploadId },
       include: {
@@ -129,17 +142,15 @@ export async function POST(req: Request) {
     }
 
     for (const record of records) {
-      // If caller requested retrying only failed deliveries, skip records whose latest log isn't FAILED
       if (retryFailedOnly) {
         const latestLog = record.salarySlip?.emailLogs?.[0];
         if (!latestLog || latestLog.status !== "FAILED") {
-          // nothing to retry for this record
           results.skipped++;
           continue;
         }
       }
 
-      await dispatchEmailForRecord(record, results);
+      await dispatchEmailForRecord(record, companyName, companyAddress, results);
     }
 
     return NextResponse.json(results);

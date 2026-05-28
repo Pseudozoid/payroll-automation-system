@@ -33,14 +33,18 @@ function createTransporter() {
 
 function buildHtmlBody(params: {
   companyName: string;
+  companyAddress?: string;
   name: string;
   month: number;
   year: number;
   netSalary: number;
 }): string {
-  const { companyName, name, month, year, netSalary } = params;
+  const { companyName, companyAddress, name, month, year, netSalary } = params;
   const monthLabel = formatMonth(month, year);
   const netFormatted = formatINR(netSalary);
+  const addressHtml = companyAddress
+    ? `<p style="margin:6px 0 0;color:rgba(255,255,255,0.72);font-size:13px;line-height:1.5;">${companyAddress}</p>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -55,7 +59,8 @@ function buildHtmlBody(params: {
     <!-- Header -->
     <div style="background:#6366f1;padding:36px 44px;">
       <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">${companyName}</h1>
-      <p style="margin:6px 0 0;color:rgba(255,255,255,0.72);font-size:13px;">Salary Slip &middot; ${monthLabel}</p>
+      ${addressHtml}
+      <p style="margin:10px 0 0;color:rgba(255,255,255,0.72);font-size:13px;">Salary Slip &middot; ${monthLabel}</p>
     </div>
 
     <!-- Body -->
@@ -102,6 +107,8 @@ export interface SendSlipEmailParams {
   month: number;
   year: number;
   netSalary: number;
+  companyName: string;
+  companyAddress?: string;
   /** Base64-encoded PDF content */
   pdfBase64: string;
   pdfFileName: string;
@@ -112,8 +119,7 @@ export interface SendSlipEmailParams {
  * Throws on SMTP failure — caller is responsible for catching and logging.
  */
 export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> {
-  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Your Company";
-  const from = process.env.SMTP_FROM ?? `"${companyName}" <${process.env.SMTP_USER}>`;
+  const from = process.env.SMTP_FROM ?? `"${params.companyName}" <${process.env.SMTP_USER}>`;
   const monthLabel = formatMonth(params.month, params.year);
 
   const transporter = createTransporter();
@@ -121,9 +127,10 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
   await transporter.sendMail({
     from,
     to: params.to,
-    subject: `Your Salary Slip for ${monthLabel} — ${companyName}`,
+    subject: `Your Salary Slip for ${monthLabel} — ${params.companyName}`,
     html: buildHtmlBody({
-      companyName,
+      companyName: params.companyName,
+      companyAddress: params.companyAddress,
       name: params.name,
       month: params.month,
       year: params.year,

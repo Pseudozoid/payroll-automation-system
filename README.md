@@ -20,6 +20,27 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Local Email Testing With Mailtrap
+
+This app sends email through Nodemailer over SMTP, so Mailtrap works without code changes.
+
+1. Create a Mailtrap inbox and open its SMTP settings.
+2. Copy the sandbox credentials into your local `.env` file:
+
+```env
+SMTP_HOST="sandbox.smtp.mailtrap.io"
+SMTP_PORT="2525"
+SMTP_USER="your-mailtrap-username"
+SMTP_PASS="your-mailtrap-password"
+SMTP_FROM="Payroll Team <no-reply@yourcompany.com>"
+```
+
+3. Keep `SMTP_FROM` as any friendly sender name/address you want to show in the message header.
+4. Restart `npm run dev` so Next.js picks up the new env values.
+5. Upload payroll data, generate slips, and click the email dispatch action. The messages will appear in Mailtrap's inbox instead of going to real recipients.
+
+If sending fails, check the server log for the SMTP error message. The app requires `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` to be present before it can send.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
