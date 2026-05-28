@@ -186,6 +186,7 @@ export async function generateSalarySlipPdf(
     : pageSize;
   const page = doc.addPage(size);
   const { width, height } = page.getSize();
+  const isLandscape = settings.orientation === "landscape";
 
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold    = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -194,11 +195,18 @@ export async function generateSalarySlipPdf(
   const cw = width - margin * 2;
   const contentLeft = margin;
   const contentRight = margin + cw;
-  const rowH = PAGE.rowHeight;
+  const rowH = isLandscape ? 26 : PAGE.rowHeight;
+  const sectionGap = isLandscape ? 10 : 18;
+  const footerY = isLandscape ? 28 : 48;
+  const footerTextSize = isLandscape ? 6.5 : 7;
+  const headerH = isLandscape ? 82 : 92;
+  const detailsCardH = isLandscape ? 84 : 92;
+  const earningsCardH = isLandscape ? 136 : 146;
+  const deductionsCardH = isLandscape ? 68 : 76;
+  const netBoxH = isLandscape ? 76 : 88;
   let y = height - margin;
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
-  const headerH = 92;
   const headerBottom = y - headerH;
   page.drawRectangle({
     x: contentLeft,
@@ -279,12 +287,11 @@ export async function generateSalarySlipPdf(
     color: C.gray,
   });
 
-  y = headerBottom - 18;
+  y = headerBottom - sectionGap;
 
   // ── EMPLOYEE DETAILS ────────────────────────────────────────────────────────
   const detailsTitleY = y;
   y = drawSectionHeading(page, contentLeft, detailsTitleY, "Employee details", "Employee identity and contact information", bold, regular, C.primary);
-  const detailsCardH = 92;
   const detailsCardY = y - detailsCardH + 6;
   page.drawRectangle({
     x: contentLeft,
@@ -333,7 +340,6 @@ export async function generateSalarySlipPdf(
     ["House Rent Allowance (HRA)", data.hra],
     ["Other Allowances", data.allowances],
   ];
-  const earningsCardH = 146;
   const earningsCardY = y - earningsCardH + 6;
   page.drawRectangle({
     x: contentLeft,
@@ -402,11 +408,10 @@ export async function generateSalarySlipPdf(
     C.primary
   );
 
-  y = earningsCardY - 20;
+  y = earningsCardY - sectionGap;
 
   // ── DEDUCTIONS ──────────────────────────────────────────────────────────────
   y = drawSectionHeading(page, contentLeft, y, "Deductions", "Statutory and other deductions applied this month", bold, regular, C.danger);
-  const deductionsCardH = 76;
   const deductionsCardY = y - deductionsCardH + 6;
   page.drawRectangle({
     x: contentLeft,
@@ -457,11 +462,11 @@ export async function generateSalarySlipPdf(
     C.dark
   );
 
-  y = deductionsCardY - 18;
+  y = deductionsCardY - sectionGap;
 
   // ── NET SALARY ───────────────────────────────────────────────────────────────
-  const netBoxH = 88;
-  const netBoxY = y - netBoxH + 4;
+  const footerReserveTop = footerY + (settings.showFooterNote ? 28 : 18);
+  const netBoxY = Math.max(y - netBoxH + 4, footerReserveTop + 10);
   page.drawRectangle({
     x: contentLeft,
     y: netBoxY,
@@ -475,22 +480,22 @@ export async function generateSalarySlipPdf(
 
   page.drawText("NET SALARY", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 24,
-    size: 8,
+    y: netBoxY + netBoxH - 22,
+    size: isLandscape ? 7.8 : 8,
     font: bold,
     color: C.gray,
   });
   page.drawText("Take-home pay", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 38,
-    size: 7.2,
+    y: netBoxY + netBoxH - 35,
+    size: isLandscape ? 7 : 7.2,
     font: regular,
     color: C.gray,
   });
   page.drawText(formatInrForPdf(data.netSalary), {
     x: contentLeft + 18,
-    y: netBoxY + 24,
-    size: 26,
+    y: netBoxY + 18,
+    size: isLandscape ? 23 : 26,
     font: bold,
     color: C.success,
   });
@@ -499,17 +504,16 @@ export async function generateSalarySlipPdf(
   const noteW = regular.widthOfTextAtSize(takeHomeNote, 8.3);
   page.drawText(takeHomeNote, {
     x: contentRight - 18 - noteW,
-    y: netBoxY + 28,
-    size: 8.3,
+    y: netBoxY + 22,
+    size: isLandscape ? 7.8 : 8.3,
     font: regular,
     color: C.gray,
   });
 
   // ── FOOTER ───────────────────────────────────────────────────────────────────
-  const footerY = 48;
   page.drawLine({
-    start: { x: contentLeft, y: footerY + 16 },
-    end: { x: contentRight, y: footerY + 16 },
+    start: { x: contentLeft, y: footerY + 14 },
+    end: { x: contentRight, y: footerY + 14 },
     thickness: 0.5,
     color: C.border,
   });
@@ -520,7 +524,7 @@ export async function generateSalarySlipPdf(
     page.drawText(footerText, {
       x: contentLeft,
       y: footerY,
-      size: 7,
+      size: footerTextSize,
       font: regular,
       color: C.gray,
     });
