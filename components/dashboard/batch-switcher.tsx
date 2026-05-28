@@ -205,7 +205,7 @@ export function BatchSwitcher({
     record.salarySlip?.emailLogs?.some((log) => log.status === "SENT")
   ).length;
   const failedDeliveries = selectedUpload.records.filter((record) =>
-    record.salarySlip?.emailLogs?.some((log) => log.status === "FAILED")
+    record.salarySlip?.emailLogs?.[0]?.status === "FAILED"
   ).length;
   const selectedUploadRecordCount = selectedUpload._count?.records ?? selectedUpload.records.length;
 

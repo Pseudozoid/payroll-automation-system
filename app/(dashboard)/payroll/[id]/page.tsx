@@ -49,6 +49,7 @@ export default function PayrollDetailPage() {
   const [upload, setUpload] = useState<UploadWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [sendingRecordId, setSendingRecordId] = useState<string | null>(null);
 
   const [generateState, setGenerateState] = useState<ActionFeedback>({ state: "idle" });
   const [emailState, setEmailState] = useState<ActionFeedback>({ state: "idle" });
@@ -70,7 +71,13 @@ export default function PayrollDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => { fetchUpload(); }, [fetchUpload]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchUpload();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchUpload]);
 
   // ─── Generate PDFs ──────────────────────────────────────────────────────────
 
@@ -105,6 +112,32 @@ export default function PayrollDetailPage() {
       await fetchUpload();
     } catch (err) {
       setEmailState({ state: "error", error: (err as Error).message });
+    }
+  }
+
+  async function handleDispatchSingle(recordId: string) {
+    if (sendingRecordId) {
+      return;
+    }
+
+    setSendingRecordId(recordId);
+    try {
+      const res = await fetch("/api/email/dispatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadId: id, recordId }),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error ?? "Unable to send email for this employee.");
+      }
+
+      await fetchUpload();
+    } catch (err) {
+      setEmailState({ state: "error", error: (err as Error).message });
+    } finally {
+      setSendingRecordId(null);
     }
   }
 
@@ -272,17 +305,34 @@ export default function PayrollDetailPage() {
                     )}
                   </td>
                   <td className="text-center">
-                    {record.salarySlip && (
-                      <a
-                        href={`/api/salary-slips/${record.salarySlip.id}/pdf`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-indigo-300 hover:text-indigo-200 font-medium transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        PDF
-                      </a>
-                    )}
+                    <div className="flex flex-col items-center gap-2">
+                      {record.salarySlip ? (
+                        <a
+                          href={`/api/salary-slips/${record.salarySlip.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-indigo-300 hover:text-indigo-200 font-medium transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          PDF
+                        </a>
+                      ) : (
+                        <span className="text-xs text-slate-500">Generate first</span>
+                      )}
+
+                      {record.salarySlip && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          loading={sendingRecordId === record.id}
+                          onClick={() => handleDispatchSingle(record.id)}
+                          icon={<Mail className="w-3.5 h-3.5" />}
+                          disabled={sendingRecordId !== null || generateState.state === "loading" || emailState.state === "loading"}
+                        >
+                          Mail
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
