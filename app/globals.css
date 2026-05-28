@@ -1,26 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Brand */
+  --color-brand-50:  oklch(0.968 0.016 264);
+  --color-brand-100: oklch(0.930 0.039 264);
+  --color-brand-500: oklch(0.585 0.198 264);
+  --color-brand-600: oklch(0.527 0.193 264);
+  --color-brand-700: oklch(0.470 0.178 264);
+
+  /* Sidebar */
+  --color-sidebar: oklch(0.085 0.014 264);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ─── Radix Dialog animations ───────────────────────────────────────────────── */
+
+@keyframes overlay-show {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes overlay-hide {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes content-show {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes content-hide {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+}
+
+[data-radix-dialog-overlay][data-state="open"]  { animation: overlay-show 160ms ease; }
+[data-radix-dialog-overlay][data-state="closed"] { animation: overlay-hide 120ms ease; }
+[data-radix-dialog-content][data-state="open"]  { animation: content-show 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+[data-radix-dialog-content][data-state="closed"] { animation: content-hide 140ms ease; }
+
+/* ─── Upload zone drag state ────────────────────────────────────────────────── */
+
+.upload-zone-drag {
+  border-color: #6366f1 !important;
+  background-color: #eef2ff !important;
+}
+
+/* ─── Table ─────────────────────────────────────────────────────────────────── */
+
+.data-table th {
+  background: #f8fafc;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.data-table tr:hover td {
+  background-color: #f8fafc;
 }
