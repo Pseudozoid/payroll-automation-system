@@ -104,11 +104,10 @@ export default function PayrollDetailPage() {
   async function handleDispatch() {
     setEmailState({ state: "loading" });
     try {
-      const settings = loadPdfSettings();
       const res = await fetch("/api/email/dispatch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uploadId: id, settings }),
+        body: JSON.stringify({ uploadId: id }),
       });
       const data: DispatchResult = await res.json();
       setEmailState({ state: "done", result: data });
@@ -125,11 +124,10 @@ export default function PayrollDetailPage() {
 
     setSendingRecordId(recordId);
     try {
-      const settings = loadPdfSettings();
       const res = await fetch("/api/email/dispatch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uploadId: id, recordId, settings }),
+        body: JSON.stringify({ uploadId: id, recordId }),
       });
 
       if (!res.ok) {

@@ -3,14 +3,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, AppError } from "@/lib/api-error";
 import { sendSlipEmail } from "@/lib/email";
-import { parsePdfSettings } from "@/lib/pdf-settings";
+import { getBrandingSettings } from "@/lib/branding";
 
 const schema = z
   .object({
     uploadId: z.string().min(1).optional(),
     recordId: z.string().min(1).optional(),
     retryFailedOnly: z.boolean().optional(),
-    settings: z.unknown().optional(),
   })
   .refine((value) => value.uploadId || value.recordId, {
     message: "uploadId or recordId is required",
@@ -18,7 +17,6 @@ const schema = z
 
 async function dispatchEmailForRecord(
   record: {
-    id: string;
     employeeCode: string;
     email: string;
     name: string;
@@ -88,10 +86,10 @@ async function dispatchEmailForRecord(
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { uploadId, recordId, retryFailedOnly, settings } = schema.parse(body);
-    const pdfSettings = parsePdfSettings(settings);
-    const companyName = pdfSettings.companyName?.trim() || process.env.NEXT_PUBLIC_COMPANY_NAME || "Company";
-    const companyAddress = pdfSettings.companyAddress?.trim() || process.env.COMPANY_ADDRESS || undefined;
+    const { uploadId, recordId, retryFailedOnly } = schema.parse(body);
+    const brandingSettings = await getBrandingSettings();
+    const companyName = brandingSettings.companyName;
+    const companyAddress = brandingSettings.companyAddress;
 
     const results = { sent: 0, failed: 0, skipped: 0, errors: [] as string[] };
 

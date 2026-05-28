@@ -269,7 +269,12 @@ export function BatchSwitcher({
             <Link href={`/payroll/${selectedUpload.id}`}>
               <Button size="sm">View Upload</Button>
             </Link>
-            {failedDeliveries > 0 && <RetryFailedButton uploadId={selectedUpload.id} />}
+            {failedDeliveries > 0 && (
+              <RetryFailedButton
+                uploadId={selectedUpload.id}
+                onRetryComplete={() => loadUpload(selectedUpload.id)}
+              />
+            )}
           </div>
         </div>
         <div className="px-6 py-4">

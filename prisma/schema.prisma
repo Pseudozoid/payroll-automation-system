@@ -92,6 +92,16 @@ model EmailLog {
   @@index([status])
 }
 
+// ─── Branding Settings ────────────────────────────────────────────────────────
+// Singleton row that stores company branding shared across all browsers.
+model BrandingSettings {
+  id            Int      @id @default(1)
+  companyName   String   @default("Company")
+  companyAddress String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum UploadStatus {

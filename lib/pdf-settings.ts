@@ -9,7 +9,14 @@ export const pdfSettingsSchema = z.object({
   companyAddress: z.string().max(500).optional(),
 });
 
+const layoutSettingsSchema = pdfSettingsSchema.omit({
+  companyName: true,
+  companyAddress: true,
+});
+
 export type PdfSettings = z.infer<typeof pdfSettingsSchema>;
+
+type LayoutSettings = z.infer<typeof layoutSettingsSchema>;
 
 export const DEFAULT_PDF_SETTINGS: PdfSettings = {
   pageSize: "A4",
@@ -21,6 +28,15 @@ export const DEFAULT_PDF_SETTINGS: PdfSettings = {
 };
 
 export const PDF_SETTINGS_STORAGE_KEY = "salary-slip-settings:pdf-layout";
+
+function toLayoutSettings(settings: PdfSettings): LayoutSettings {
+  return {
+    pageSize: settings.pageSize,
+    margin: settings.margin,
+    showCompanyAddress: settings.showCompanyAddress,
+    showFooterNote: settings.showFooterNote,
+  };
+}
 
 export function parsePdfSettings(value: unknown): PdfSettings {
   const parsed = pdfSettingsSchema.safeParse(value);
@@ -38,7 +54,16 @@ export function loadPdfSettings(): PdfSettings {
       return DEFAULT_PDF_SETTINGS;
     }
 
-    return parsePdfSettings(JSON.parse(raw) as unknown);
+    const parsed = layoutSettingsSchema.safeParse(JSON.parse(raw) as unknown);
+
+    if (!parsed.success) {
+      return DEFAULT_PDF_SETTINGS;
+    }
+
+    return {
+      ...DEFAULT_PDF_SETTINGS,
+      ...parsed.data,
+    };
   } catch {
     return DEFAULT_PDF_SETTINGS;
   }
@@ -49,5 +74,5 @@ export function savePdfSettings(settings: PdfSettings): void {
     return;
   }
 
-  window.localStorage.setItem(PDF_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+  window.localStorage.setItem(PDF_SETTINGS_STORAGE_KEY, JSON.stringify(toLayoutSettings(settings)));
 }

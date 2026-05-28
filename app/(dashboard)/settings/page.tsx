@@ -74,26 +74,100 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<PdfSettings>(DEFAULT_PDF_SETTINGS);
   const [ready, setReady] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [brandingError, setBrandingError] = useState<string | null>(null);
+  const [brandingSaving, setBrandingSaving] = useState(false);
 
   useEffect(() => {
-    // Load the persisted browser preference after mount so the server render stays stable.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSettings(loadPdfSettings());
-    setReady(true);
+    let cancelled = false;
+
+    async function loadSettings() {
+      const localSettings = loadPdfSettings();
+
+      try {
+        const response = await fetch("/api/settings/branding");
+        const branding = response.ok ? await response.json() : null;
+
+        if (cancelled) {
+          return;
+        }
+
+        setSettings({
+          ...localSettings,
+          companyName: branding?.companyName ?? localSettings.companyName,
+          companyAddress: branding?.companyAddress ?? localSettings.companyAddress,
+        });
+      } catch {
+        if (!cancelled) {
+          setBrandingError("Unable to load server branding settings. Using defaults.");
+        }
+      } finally {
+        if (!cancelled) {
+          setReady(true);
+        }
+      }
+    }
+
+    void loadSettings();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  async function persistBranding(companyName: string, companyAddress?: string) {
+    setBrandingSaving(true);
+    setBrandingError(null);
+
+    try {
+      const response = await fetch("/api/settings/branding", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyName, companyAddress }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error ?? "Unable to save branding settings.");
+      }
+
+      const saved = await response.json();
+      setSettings((current) => ({
+        ...current,
+        companyName: saved.companyName,
+        companyAddress: saved.companyAddress,
+      }));
+      setSavedAt(new Date());
+    } catch (err) {
+      setBrandingError((err as Error).message);
+    } finally {
+      setBrandingSaving(false);
+    }
+  }
 
   function updateField<K extends FieldName>(field: K, value: PdfSettings[K]) {
     setSettings((current) => {
       const next = { ...current, [field]: value } as PdfSettings;
-      savePdfSettings(next);
-      setSavedAt(new Date());
+
+      if (field !== "companyName" && field !== "companyAddress") {
+        savePdfSettings(next);
+        setSavedAt(new Date());
+      }
+
       return next;
     });
+  }
+
+  function handleBrandingBlur() {
+    void persistBranding(settings.companyName ?? "", settings.companyAddress);
   }
 
   function handleReset() {
     setSettings(DEFAULT_PDF_SETTINGS);
     savePdfSettings(DEFAULT_PDF_SETTINGS);
+    void persistBranding(
+      DEFAULT_PDF_SETTINGS.companyName || "Company",
+      DEFAULT_PDF_SETTINGS.companyAddress
+    );
     setSavedAt(new Date());
   }
 
@@ -133,7 +207,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader
           title="Branding"
-          description="Set company name and address that appear on generated PDFs. These values are stored in your browser by default."
+          description="Set the company name and address that appear on generated PDFs and emails. These values are stored on the server."
         />
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -141,6 +215,7 @@ export default function SettingsPage() {
             label="Company name"
             value={settings.companyName ?? ""}
             onChange={(e) => updateField("companyName", e.target.value)}
+            onBlur={handleBrandingBlur}
             placeholder={process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Company"}
           />
 
@@ -148,6 +223,7 @@ export default function SettingsPage() {
             label="Company address"
             value={settings.companyAddress ?? ""}
             onChange={(e) => updateField("companyAddress", e.target.value)}
+            onBlur={handleBrandingBlur}
             placeholder="Street, City, State, Country"
           />
         </div>
@@ -208,9 +284,15 @@ export default function SettingsPage() {
       <div className="flex items-center gap-2 text-xs text-slate-400">
         <CircleCheckBig className="h-3.5 w-3.5 text-emerald-400" />
         {savedAt
-          ? `Saved locally at ${savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`
-          : "Changes save automatically in this browser."}
+          ? `Saved at ${savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`
+          : "Layout changes save in this browser, branding syncs to the server."}
       </div>
+
+      {(brandingSaving || brandingError) && (
+        <p className={`text-xs ${brandingError ? "text-rose-400" : "text-slate-400"}`}>
+          {brandingError ?? "Syncing branding settings to the server..."}
+        </p>
+      )}
     </div>
   );
 }

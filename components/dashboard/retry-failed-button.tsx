@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export function RetryFailedButton({ uploadId }: { uploadId: string }) {
-  const router = useRouter();
+export function RetryFailedButton({
+  uploadId,
+  onRetryComplete,
+}: {
+  uploadId: string;
+  onRetryComplete?: () => Promise<void> | void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +28,7 @@ export function RetryFailedButton({ uploadId }: { uploadId: string }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error ?? "Retry failed");
 
-      router.refresh();
+      await onRetryComplete?.();
     } catch (err) {
       setError((err as Error).message);
     } finally {

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { handleApiError, AppError } from "@/lib/api-error";
 import { generateSalarySlipPdf } from "@/lib/pdf";
 import { parsePdfSettings } from "@/lib/pdf-settings";
+import { getBrandingSettings } from "@/lib/branding";
 
 const schema = z.object({
   uploadId: z.string().min(1),
@@ -26,8 +27,9 @@ export async function POST(req: Request) {
       throw new AppError("This upload has no records.", 400);
     }
 
-    const companyName = pdfSettings.companyName ?? process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Company";
-    const companyAddress = pdfSettings.companyAddress ?? process.env.COMPANY_ADDRESS ?? undefined;
+    const brandingSettings = await getBrandingSettings();
+    const companyName = brandingSettings.companyName;
+    const companyAddress = brandingSettings.companyAddress;
 
     const results = { success: 0, failed: 0, errors: [] as string[] };
 
