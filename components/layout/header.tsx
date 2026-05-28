@@ -27,7 +27,7 @@ export function Header() {
       <div>
         <h1 className="text-sm font-semibold text-slate-100">{label}</h1>
         <p className="text-xs text-slate-400 mt-0.5">
-          {process.env.NEXT_PUBLIC_COMPANY_NAME ?? "PaySlip Pro"}
+          {process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Payroll Automation System"}
         </p>
       </div>
 

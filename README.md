@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Payroll Automation System
+
+Payroll Automation System is a [Next.js](https://nextjs.org) application for ingesting payroll CSV files, generating salary slips, and dispatching them by email.
 
 ## Getting Started
 

@@ -38,7 +38,7 @@ export function Sidebar() {
           <Banknote className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-white leading-none">PaySlip Pro</p>
+          <p className="text-sm font-semibold text-white leading-none">Payroll Automation System</p>
           <p className="text-[11px] text-slate-500 mt-0.5">Admin Console</p>
         </div>
       </div>

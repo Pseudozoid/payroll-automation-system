@@ -49,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-4">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl" />
@@ -81,7 +81,7 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="mt-1.5 text-sm text-slate-500">
-              Sign in to your PaySlip Pro admin account
+              Sign in to your Payroll Automation System admin account
             </p>
           </div>
 
