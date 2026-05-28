@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -13,14 +14,35 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/",        label: "Dashboard",     icon: LayoutDashboard },
-  { href: "/upload",  label: "Upload Payroll", icon: Upload },
-  { href: "/history", label: "History",        icon: History },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const [dashboardHref, setDashboardHref] = useState("/");
+
+  const syncDashboardHref = useCallback(() => {
+    const storedUploadId = window.localStorage.getItem("salary-slip-dashboard:selected-upload-id");
+    setDashboardHref(storedUploadId ? `/?uploadId=${encodeURIComponent(storedUploadId)}` : "/");
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      syncDashboardHref();
+    }, 0);
+
+    window.addEventListener("salary-slip-dashboard-selection-changed", syncDashboardHref);
+    window.addEventListener("storage", syncDashboardHref);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("salary-slip-dashboard-selection-changed", syncDashboardHref);
+      window.removeEventListener("storage", syncDashboardHref);
+    };
+  }, [syncDashboardHref]);
+
+  const navItems = [
+    { href: dashboardHref, label: "Dashboard", icon: LayoutDashboard },
+    { href: "/upload", label: "Upload Payroll", icon: Upload },
+    { href: "/history", label: "History", icon: History },
+  ];
 
   async function handleLogout() {
     try {
@@ -45,9 +67,9 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const isActive =
-            item.href === "/"
+            item.label === "Dashboard"
               ? pathname === "/"
               : pathname.startsWith(item.href);
           const Icon = item.icon;
