@@ -7,7 +7,7 @@
  */
 
 import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib";
-import { formatINR, formatMonth, formatDate } from "./utils";
+import { formatMonth, formatDate } from "./utils";
 
 type RGBColor = ReturnType<typeof rgb>;
 
@@ -43,6 +43,17 @@ const C = {
   successBorder:rgb(0.600, 0.957, 0.784), // emerald-200
   danger:       rgb(0.694, 0.153, 0.153), // red-700 (deductions header)
 };
+
+const PDF_INR_FORMATTER = new Intl.NumberFormat("en-IN", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+function formatInrForPdf(amount: number): string {
+  // Standard Helvetica/WinAnsi in pdf-lib cannot encode the rupee symbol.
+  // Keep PDF text ASCII-safe to avoid runtime encoding errors.
+  return `INR ${PDF_INR_FORMATTER.format(amount)}`;
+}
 
 // ─── Helper functions ───────────────────────────────────────────────────────────
 
@@ -180,7 +191,7 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
   earningRows.forEach(([label, amount], idx) => {
     drawTableRow(
       page, regular, bold, margin, y, cw, rowH,
-      label, formatINR(amount),
+      label, formatInrForPdf(amount),
       idx % 2 === 0 ? C.white : C.grayLight
     );
     y -= rowH;
@@ -189,7 +200,7 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
   // Gross row
   drawTableRow(
     page, regular, bold, margin, y, cw, rowH,
-    "Gross Salary", formatINR(data.grossSalary),
+    "Gross Salary", formatInrForPdf(data.grossSalary),
     C.primaryLight, bold, bold, C.primary, C.primary
   );
   y -= rowH + 22;
@@ -208,7 +219,7 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
 
   drawTableRow(
     page, regular, bold, margin, y, cw, rowH,
-    "Total Deductions", formatINR(data.deductions),
+    "Total Deductions", formatInrForPdf(data.deductions),
     C.white
   );
   y -= rowH + 22;
@@ -224,7 +235,7 @@ export async function generateSalarySlipPdf(data: SalarySlipPdfData): Promise<Ui
   page.drawText("NET SALARY — TAKE HOME", {
     x: margin + 18, y: y - 20, size: 7.5, font: bold, color: C.gray,
   });
-  page.drawText(formatINR(data.netSalary), {
+  page.drawText(formatInrForPdf(data.netSalary), {
     x: margin + 18, y: y - 50, size: 24, font: bold, color: C.success,
   });
 
