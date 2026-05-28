@@ -130,14 +130,14 @@ function drawLabelValue(
   maxWidth: number
 ): void {
   page.drawText(label.toUpperCase(), {
-    x, y: y + 13, size: 6.8, font: regular, color: C.gray,
+    x, y: y + 12, size: 6.8, font: regular, color: C.gray,
   });
-  drawWrappedText(page, value || "—", x, y - 1, {
-    size: 10.25,
+  drawWrappedText(page, value || "—", x, y - 2, {
+    size: 9.7,
     font: bold,
     color: C.dark,
     maxWidth,
-    lineHeight: 12,
+    lineHeight: 10.8,
   });
 }
 
@@ -299,30 +299,32 @@ export async function generateSalarySlipPdf(
 
   const halfW = cw / 2;
   const cellPadX = 16;
-  const cellTop1 = detailsCardY + detailsCardH - 20;
-  const cellTop2 = detailsCardY + 34;
   const cellW = halfW - cellPadX * 2;
   const leftCellX = contentLeft + cellPadX;
   const rightCellX = contentLeft + halfW + cellPadX;
-  drawLabelValue(page, regular, bold, leftCellX, cellTop1, "Employee ID", data.employeeCode, cellW);
-  drawLabelValue(page, regular, bold, rightCellX, cellTop1, "Employee Name", data.name, cellW);
-  drawLabelValue(page, regular, bold, leftCellX, cellTop2, "Designation", data.designation, cellW);
-  drawLabelValue(page, regular, bold, rightCellX, cellTop2, "Email Address", data.email, cellW);
+  const topRowY = detailsCardY + 57;
+  const bottomRowY = detailsCardY + 22;
+  const rowDividerY = detailsCardY + 34;
 
   page.drawLine({
-    start: { x: contentLeft + halfW, y: detailsCardY + 10 },
-    end: { x: contentLeft + halfW, y: detailsCardY + detailsCardH - 10 },
+    start: { x: contentLeft + halfW, y: detailsCardY + 8 },
+    end: { x: contentLeft + halfW, y: detailsCardY + detailsCardH - 8 },
     thickness: 0.5,
     color: C.border,
   });
   page.drawLine({
-    start: { x: contentLeft + 12, y: detailsCardY + detailsCardH / 2 },
-    end: { x: contentRight - 12, y: detailsCardY + detailsCardH / 2 },
+    start: { x: contentLeft + 12, y: rowDividerY },
+    end: { x: contentRight - 12, y: rowDividerY },
     thickness: 0.45,
     color: C.border,
   });
 
-  y = detailsCardY - 20;
+  drawLabelValue(page, regular, bold, leftCellX, topRowY, "Employee ID", data.employeeCode, cellW);
+  drawLabelValue(page, regular, bold, rightCellX, topRowY, "Employee Name", data.name, cellW);
+  drawLabelValue(page, regular, bold, leftCellX, bottomRowY, "Designation", data.designation, cellW);
+  drawLabelValue(page, regular, bold, rightCellX, bottomRowY, "Email Address", data.email, cellW);
+
+  y = detailsCardY - 18;
 
   // ── EARNINGS ────────────────────────────────────────────────────────────────
   y = drawSectionHeading(page, contentLeft, y, "Earnings", "Earnings breakdown for the current pay period", bold, regular, C.primary);
