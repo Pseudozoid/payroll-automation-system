@@ -37,3 +37,20 @@ export async function GET(
     return handleApiError(err);
   }
 }
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    await prisma.payrollUpload.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ deleted: true });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}

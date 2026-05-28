@@ -13,3 +13,13 @@ export async function GET() {
     return handleApiError(err);
   }
 }
+
+export async function DELETE() {
+  try {
+    const result = await prisma.payrollUpload.deleteMany();
+
+    return NextResponse.json({ deleted: result.count });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}

@@ -3,6 +3,7 @@ import { FileUp, Mail, ChevronRight, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { UploadDeleteAction } from "@/components/shared/upload-delete-action";
 import { UploadStatusBadge, EmailStatusBadge } from "@/components/shared/status-badge";
 import { formatMonth, formatDateTime, formatINR } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -67,11 +68,24 @@ export default async function HistoryPage() {
 
   return (
     <div className="max-w-5xl space-y-8">
-      <div>
-        <h1 className="text-xl font-bold text-slate-100 tracking-tight">History</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          All payroll uploads and email dispatch records.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-100 tracking-tight">History</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            All payroll uploads and email dispatch records.
+          </p>
+        </div>
+
+        {uploads.length > 0 && (
+          <UploadDeleteAction
+            clearAll
+            uploadCount={uploads.length}
+            buttonLabel="Clear history"
+            dialogTitle="Clear all payroll history?"
+            dialogDescription="This will remove every payroll upload and its related data."
+            confirmLabel="Clear history"
+          />
+        )}
       </div>
 
       {/* ── Payroll Uploads ──────────────────────────────────────────────────── */}

@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { UploadDeleteAction } from "@/components/shared/upload-delete-action";
 import { SlipStatusBadge } from "@/components/shared/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatINR, formatMonth, formatDateTime } from "@/lib/utils";
@@ -210,6 +211,15 @@ export default function PayrollDetailPage() {
         >
           Refresh
         </Button>
+
+        <UploadDeleteAction
+          uploadId={id}
+          buttonLabel="Delete upload"
+          dialogTitle="Delete this payroll upload?"
+          dialogDescription="This action cannot be undone."
+          confirmLabel="Delete upload"
+          redirectTo="/history"
+        />
       </div>
 
       {/* Action feedback */}
