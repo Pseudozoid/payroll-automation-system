@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const pdfSettingsSchema = z.object({
   pageSize: z.enum(["A4", "Letter"]),
-  orientation: z.enum(["portrait", "landscape"]),
   margin: z.number().int().min(32).max(80),
   showCompanyAddress: z.boolean(),
   showFooterNote: z.boolean(),
@@ -14,7 +13,6 @@ export type PdfSettings = z.infer<typeof pdfSettingsSchema>;
 
 export const DEFAULT_PDF_SETTINGS: PdfSettings = {
   pageSize: "A4",
-  orientation: "portrait",
   margin: 50,
   showCompanyAddress: true,
   showFooterNote: true,

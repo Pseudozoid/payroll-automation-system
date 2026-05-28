@@ -156,10 +156,10 @@ export default function SettingsPage() {
       <Card>
         <CardHeader
           title="Page format"
-          description="Control the page size, orientation, and margins used by the generator."
+          description="Control the page size and margins used by the generator."
         />
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <SelectField
             label="Paper size"
             value={settings.pageSize}
@@ -168,16 +168,6 @@ export default function SettingsPage() {
           >
             <option value="A4">A4</option>
             <option value="Letter">Letter</option>
-          </SelectField>
-
-          <SelectField
-            label="Orientation"
-            value={settings.orientation}
-            onChange={(value) => updateField("orientation", value as PdfSettings["orientation"])}
-            hint="Landscape gives the table more horizontal room."
-          >
-            <option value="portrait">Portrait</option>
-            <option value="landscape">Landscape</option>
           </SelectField>
 
           <SelectField

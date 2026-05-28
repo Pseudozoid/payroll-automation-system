@@ -181,12 +181,8 @@ export async function generateSalarySlipPdf(
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const pageSize = settings.pageSize === "Letter" ? ([612, 792] as const) : ([595.28, 841.89] as const);
-  const size = settings.orientation === "landscape"
-    ? ([pageSize[1], pageSize[0]] as const)
-    : pageSize;
-  const page = doc.addPage(size);
+  const page = doc.addPage(pageSize);
   const { width, height } = page.getSize();
-  const isLandscape = settings.orientation === "landscape";
 
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold    = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -195,15 +191,15 @@ export async function generateSalarySlipPdf(
   const cw = width - margin * 2;
   const contentLeft = margin;
   const contentRight = margin + cw;
-  const rowH = isLandscape ? 26 : PAGE.rowHeight;
-  const sectionGap = isLandscape ? 10 : 18;
-  const footerY = isLandscape ? 28 : 48;
-  const footerTextSize = isLandscape ? 6.5 : 7;
-  const headerH = isLandscape ? 82 : 92;
-  const detailsCardH = isLandscape ? 84 : 92;
-  const earningsCardH = isLandscape ? 136 : 146;
-  const deductionsCardH = isLandscape ? 64 : 76;
-  const netBoxH = isLandscape ? 60 : 88;
+  const rowH = PAGE.rowHeight;
+  const sectionGap = 18;
+  const footerY = 48;
+  const footerTextSize = 7;
+  const headerH = 92;
+  const detailsCardH = 92;
+  const earningsCardH = 146;
+  const deductionsCardH = 76;
+  const netBoxH = 88;
   let y = height - margin;
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
@@ -465,8 +461,7 @@ export async function generateSalarySlipPdf(
   y = deductionsCardY - sectionGap;
 
   // ── NET SALARY ───────────────────────────────────────────────────────────────
-  const footerReserveTop = footerY + (settings.showFooterNote ? 24 : 16);
-  const netBoxY = Math.max(y - netBoxH + 4, footerReserveTop + 8);
+  const netBoxY = y - netBoxH + 4;
   page.drawRectangle({
     x: contentLeft,
     y: netBoxY,
@@ -480,22 +475,22 @@ export async function generateSalarySlipPdf(
 
   page.drawText("NET SALARY", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 18,
-    size: isLandscape ? 7.2 : 8,
+    y: netBoxY + netBoxH - 24,
+    size: 8,
     font: bold,
     color: C.gray,
   });
   page.drawText("Take-home pay", {
     x: contentLeft + 18,
-    y: netBoxY + netBoxH - 30,
-    size: isLandscape ? 6.7 : 7.2,
+    y: netBoxY + netBoxH - 38,
+    size: 7.2,
     font: regular,
     color: C.gray,
   });
   page.drawText(formatInrForPdf(data.netSalary), {
     x: contentLeft + 18,
-    y: netBoxY + 14,
-    size: isLandscape ? 19.5 : 26,
+    y: netBoxY + 24,
+    size: 26,
     font: bold,
     color: C.success,
   });
@@ -504,8 +499,8 @@ export async function generateSalarySlipPdf(
   const noteW = regular.widthOfTextAtSize(takeHomeNote, 8.3);
   page.drawText(takeHomeNote, {
     x: contentRight - 18 - noteW,
-    y: netBoxY + 16,
-    size: isLandscape ? 7.1 : 8.3,
+    y: netBoxY + 28,
+    size: 8.3,
     font: regular,
     color: C.gray,
   });
