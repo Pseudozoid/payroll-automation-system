@@ -2,11 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Papa from "papaparse";
 import {
   Upload,
   FileText,
-  CheckCircle2,
   AlertCircle,
   RotateCcw,
   Loader2,
@@ -18,9 +16,10 @@ import { CsvPreview } from "@/components/upload/csv-preview";
 import { ValidationErrors } from "@/components/upload/validation-errors";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { getPayrollFileTypeLabel, parsePayrollFile } from "@/lib/payroll-file";
 import { validateCsvHeaders } from "@/validations/csv";
 import { validateAndProcessCsvRows } from "@/lib/csv";
-import type { CsvValidationResult, RawCsvRow } from "@/types";
+import type { CsvValidationResult } from "@/types";
 
 // ─── State machine ─────────────────────────────────────────────────────────────
 
@@ -49,53 +48,33 @@ export default function UploadPage() {
     setUploadError(null);
     setPreview(null);
 
-    const reader = new FileReader();
-
-    reader.onerror = () => {
-      setHeaderError("Failed to read the file. Please try again.");
-      setStep("idle");
-    };
-
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-
-      Papa.parse<RawCsvRow>(text, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (h: string) => h.trim().toLowerCase().replace(/\s+/g, "_"),
-        complete: (result: { data: RawCsvRow[]; meta: { fields?: string[] }; errors: unknown[] }) => {
-          const headers = result.meta.fields ?? [];
-
-          // Header validation
-          const missingHeaders = validateCsvHeaders(headers);
-          if (missingHeaders.length > 0) {
-            setHeaderError(
-              `Missing required column${missingHeaders.length > 1 ? "s" : ""}: ${missingHeaders.join(", ")}`
-            );
-            setStep("idle");
-            return;
-          }
-
-          const rows = result.data;
-          if (rows.length === 0) {
-            setHeaderError("The CSV file contains no data rows. Please check the file.");
-            setStep("idle");
-            return;
-          }
-
-          // Full validation + processing
-          const validationResult = validateAndProcessCsvRows(rows);
-          setPreview({ result: validationResult, fileName: file.name });
-          setStep("preview");
-        },
-        error: (err: { message: string }) => {
-          setHeaderError(`Could not parse the CSV: ${err.message}`);
+    parsePayrollFile(file)
+      .then(({ rows, headers }) => {
+        const missingHeaders = validateCsvHeaders(headers);
+        if (missingHeaders.length > 0) {
+          setHeaderError(
+            `Missing required column${missingHeaders.length > 1 ? "s" : ""}: ${missingHeaders.join(", ")}`
+          );
           setStep("idle");
-        },
-      });
-    };
+          return;
+        }
 
-    reader.readAsText(file);
+        if (rows.length === 0) {
+          setHeaderError(
+            `${getPayrollFileTypeLabel(file.name)} file contains no data rows. Please check the file.`
+          );
+          setStep("idle");
+          return;
+        }
+
+        const validationResult = validateAndProcessCsvRows(rows);
+        setPreview({ result: validationResult, fileName: file.name });
+        setStep("preview");
+      })
+      .catch((err: Error) => {
+        setHeaderError(err.message);
+        setStep("idle");
+      });
   }, []);
 
   // ─── Reset handler ────────────────────────────────────────────────────────────
@@ -150,9 +129,9 @@ export default function UploadPage() {
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-100 tracking-tight">Upload Payroll</h1>
+        <h1 className="text-xl font-bold text-slate-100 tracking-tight">Upload Payroll File</h1>
         <p className="text-sm text-slate-400 mt-1">
-          Upload a CSV file with employee payroll data. All rows are validated before saving.
+          Upload a CSV or Excel file with employee payroll data. All rows are validated before saving.
         </p>
       </div>
 
@@ -161,12 +140,12 @@ export default function UploadPage() {
         <div className="flex items-start gap-3">
           <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-slate-200 mb-1.5">Required CSV columns</p>
+            <p className="text-xs font-semibold text-slate-200 mb-1.5">Required spreadsheet columns</p>
             <code className="text-xs text-indigo-200 bg-indigo-950/40 px-2 py-1 rounded font-mono border border-indigo-900/60">
               employee_id, name, email, designation, base_salary, hra, allowances, deductions, month, year
             </code>
             <p className="text-xs text-slate-400 mt-2">
-              All rows must share the same <strong>month</strong> and <strong>year</strong> values (1–12 and 4-digit year).
+              CSV, .xlsx, and .xls files are supported. The first sheet is used for Excel uploads. All rows must share the same <strong>month</strong> and <strong>year</strong> values (1–12 and 4-digit year).
               Net salary = (base_salary + hra + allowances) − deductions.
             </p>
           </div>

@@ -12,7 +12,7 @@ interface FileUploadZoneProps {
 
 export function FileUploadZone({
   onFileSelect,
-  accept = ".csv,text/csv",
+  accept = ".csv,.xlsx,.xls",
   disabled = false,
 }: FileUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,13 +20,22 @@ export function FileUploadZone({
   const [dragError, setDragError] = useState<string | null>(null);
 
   function isValidFile(file: File): boolean {
-    return file.type === "text/csv" || file.name.endsWith(".csv");
+    const name = file.name.toLowerCase();
+
+    return (
+      name.endsWith(".csv") ||
+      name.endsWith(".xlsx") ||
+      name.endsWith(".xls") ||
+      file.type === "text/csv" ||
+      file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.type === "application/vnd.ms-excel"
+    );
   }
 
   function handleFile(file: File) {
     setDragError(null);
     if (!isValidFile(file)) {
-      setDragError("Only CSV files are supported. Please upload a .csv file.");
+      setDragError("Only CSV or Excel files are supported. Please upload a .csv, .xlsx, or .xls file.");
       return;
     }
     onFileSelect(file);
@@ -95,7 +104,7 @@ export function FileUploadZone({
 
         <div className="text-center">
           <p className="text-sm font-semibold text-slate-700">
-            {isDragging ? "Drop your CSV here" : "Upload payroll CSV"}
+            {isDragging ? "Drop your payroll file here" : "Upload payroll CSV or Excel"}
           </p>
           <p className="text-xs text-slate-500 mt-1">
             Drag and drop, or{" "}
@@ -105,7 +114,7 @@ export function FileUploadZone({
 
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <FileText className="w-3.5 h-3.5" />
-          <span>CSV files only · UTF-8 encoding recommended</span>
+          <span>CSV, .xlsx, or .xls files · first sheet is used</span>
         </div>
       </div>
 

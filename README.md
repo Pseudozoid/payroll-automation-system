@@ -1,6 +1,6 @@
 # Payroll Automation System
 
-Payroll Automation System is a [Next.js](https://nextjs.org) application for ingesting payroll CSV files, generating salary slips, and dispatching them by email.
+Payroll Automation System is a [Next.js](https://nextjs.org) application for ingesting payroll CSV and Excel files, generating salary slips, and dispatching them by email.
 
 ## Getting Started
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   FileText,
@@ -45,7 +45,6 @@ interface ActionFeedback {
 
 export default function PayrollDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
 
   const [upload, setUpload] = useState<UploadWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
