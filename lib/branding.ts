@@ -34,7 +34,11 @@ export async function getBrandingSettings(): Promise<BrandingSettings> {
     where: { id: 1 },
   });
 
-  return normalizeBrandingSettings(row);
+  const payload = row
+    ? { companyName: row.companyName, companyAddress: row.companyAddress ?? undefined }
+    : undefined;
+
+  return normalizeBrandingSettings(payload);
 }
 
 export async function saveBrandingSettings(input: unknown): Promise<BrandingSettings> {

@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Banknote, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
-import type { Metadata } from "next";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -37,7 +36,7 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        window.location.href = "/";
+        window.location.replace("/");
         return;
       }
 

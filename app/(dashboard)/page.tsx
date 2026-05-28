@@ -35,7 +35,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           },
         },
       },
-    };
+    } as const;
 
     if (selectedUploadId) {
       latestUpload = await prisma.payrollUpload.findUnique({

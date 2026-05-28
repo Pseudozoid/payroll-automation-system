@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { handleApiError, AppError } from "@/lib/api-error";
+import { handleApiError } from "@/lib/api-error";
 
 const recordSchema = z.object({
   employeeCode: z.string().min(1),

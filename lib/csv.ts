@@ -4,7 +4,7 @@
  * and server (API routes / Server Components).
  */
 
-import { csvRowSchema, validateCsvHeaders } from "@/validations/csv";
+import { csvRowSchema } from "@/validations/csv";
 import type { RawCsvRow, ValidatedCsvRow, CsvRowError, CsvValidationResult } from "@/types";
 import { roundCurrency } from "./utils";
 

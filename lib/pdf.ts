@@ -180,8 +180,8 @@ export async function generateSalarySlipPdf(
   settings: PdfSettings = DEFAULT_PDF_SETTINGS
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  const pageSize = settings.pageSize === "Letter" ? ([612, 792] as const) : ([595.28, 841.89] as const);
-  const page = doc.addPage(pageSize);
+  const pageSize = settings.pageSize === "Letter" ? [612, 792] : [595.28, 841.89];
+  const page = doc.addPage(pageSize as [number, number]);
   const { width, height } = page.getSize();
 
   const regular = await doc.embedFont(StandardFonts.Helvetica);

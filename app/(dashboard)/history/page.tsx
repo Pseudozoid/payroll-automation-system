@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileUp, Mail, ChevronRight, Inbox } from "lucide-react";
+import { FileUp, Mail, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";

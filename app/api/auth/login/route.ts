@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const parsed = loginSchema.parse(body);
     email = parsed.email;
     password = parsed.password;
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid request data format." },
       { status: 400 }
