@@ -10,7 +10,7 @@ export function Card({ children, className, noPadding }: CardProps) {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-slate-200 shadow-sm",
+        "bg-slate-900/80 rounded-xl border border-slate-800 shadow-sm shadow-black/20",
         !noPadding && "p-6",
         className
       )}
@@ -31,9 +31,9 @@ export function CardHeader({ title, description, action, className }: CardHeader
   return (
     <div className={cn("flex items-start justify-between gap-4 mb-6", className)}>
       <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-base font-semibold text-slate-100">{title}</h2>
         {description && (
-          <p className="mt-0.5 text-sm text-slate-500">{description}</p>
+          <p className="mt-0.5 text-sm text-slate-400">{description}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}

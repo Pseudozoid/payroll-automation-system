@@ -17,13 +17,13 @@ export function EmptyState({ icon, title, description, action, className }: Empt
       )}
     >
       {icon && (
-        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4 text-slate-400">
+        <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mb-4 text-slate-300">
           {icon}
         </div>
       )}
-      <p className="text-sm font-semibold text-slate-700">{title}</p>
+      <p className="text-sm font-semibold text-slate-100">{title}</p>
       {description && (
-        <p className="mt-1.5 text-sm text-slate-500 max-w-xs">{description}</p>
+        <p className="mt-1.5 text-sm text-slate-400 max-w-xs">{description}</p>
       )}
       {action && <div className="mt-5">{action}</div>}
     </div>

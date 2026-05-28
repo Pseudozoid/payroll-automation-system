@@ -150,22 +150,22 @@ export default function UploadPage() {
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Upload Payroll</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-xl font-bold text-slate-100 tracking-tight">Upload Payroll</h1>
+        <p className="text-sm text-slate-400 mt-1">
           Upload a CSV file with employee payroll data. All rows are validated before saving.
         </p>
       </div>
 
       {/* CSV format guide */}
-      <Card className="bg-slate-50 border-slate-200">
+      <Card className="bg-slate-900 border-slate-800">
         <div className="flex items-start gap-3">
           <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-slate-700 mb-1.5">Required CSV columns</p>
-            <code className="text-xs text-indigo-700 bg-indigo-50 px-2 py-1 rounded font-mono">
+            <p className="text-xs font-semibold text-slate-200 mb-1.5">Required CSV columns</p>
+            <code className="text-xs text-indigo-200 bg-indigo-950/40 px-2 py-1 rounded font-mono border border-indigo-900/60">
               employee_id, name, email, designation, base_salary, hra, allowances, deductions, month, year
             </code>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-slate-400 mt-2">
               All rows must share the same <strong>month</strong> and <strong>year</strong> values (1–12 and 4-digit year).
               Net salary = (base_salary + hra + allowances) − deductions.
             </p>
@@ -189,7 +189,7 @@ export default function UploadPage() {
               />
 
               {step === "parsing" && (
-                <div className="flex items-center justify-center gap-2 mt-4 text-sm text-slate-500">
+                <div className="flex items-center justify-center gap-2 mt-4 text-sm text-slate-400">
                   <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
                   Parsing and validating file…
                 </div>
@@ -222,7 +222,7 @@ export default function UploadPage() {
             {/* Valid rows preview */}
             {hasValidRows ? (
               <Card noPadding>
-                <div className="px-6 py-4 border-b border-slate-100">
+                <div className="px-6 py-4 border-b border-slate-800">
                   <CardHeader
                     className="mb-0"
                     title="Payroll Preview"
@@ -253,8 +253,8 @@ export default function UploadPage() {
               <Card>
                 <div className="text-center py-10">
                   <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-slate-700">All rows failed validation</p>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm font-medium text-slate-100">All rows failed validation</p>
+                  <p className="text-sm text-slate-400 mt-1">
                     Fix the errors above and re-upload your CSV.
                   </p>
                   <Button className="mt-4" variant="secondary" onClick={handleReset}>

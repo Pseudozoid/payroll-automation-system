@@ -22,10 +22,10 @@ export function Header() {
   const initials = getInitials(adminEmail);
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shrink-0">
+    <header className="h-16 border-b border-slate-800 bg-slate-950/90 backdrop-blur px-6 flex items-center justify-between shrink-0">
       {/* Left: page title */}
       <div>
-        <h1 className="text-sm font-semibold text-slate-900">{label}</h1>
+        <h1 className="text-sm font-semibold text-slate-100">{label}</h1>
         <p className="text-xs text-slate-400 mt-0.5">
           {process.env.NEXT_PUBLIC_COMPANY_NAME ?? "PaySlip Pro"}
         </p>

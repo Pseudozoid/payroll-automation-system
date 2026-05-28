@@ -30,8 +30,8 @@ function StatCard({
     <Card>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900 tracking-tight">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-slate-100 tracking-tight">
             {value.toLocaleString("en-IN")}
           </p>
           {description && (
@@ -103,10 +103,10 @@ export default async function DashboardPage() {
 
       {/* Recent Uploads */}
       <Card noPadding>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">Recent Payroll Uploads</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Latest uploaded payroll data</p>
+            <h2 className="text-sm font-semibold text-slate-100">Recent Payroll Uploads</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Latest uploaded payroll data</p>
           </div>
           <Link href="/upload">
             <Button size="sm" icon={<Upload className="w-3.5 h-3.5" />}>
@@ -127,18 +127,18 @@ export default async function DashboardPage() {
             }
           />
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-slate-800">
             {recentUploads.map((upload: typeof recentUploads[0]) => (
               <Link
                 key={upload.id}
                 href={`/payroll/${upload.id}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group"
+                className="flex items-center justify-between px-6 py-4 hover:bg-slate-800/70 transition-colors group"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">
+                  <p className="text-sm font-medium text-slate-100 truncate">
                     {upload.fileName}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5">
                     {formatMonth(upload.month, upload.year)} ·{" "}
                     {(upload as typeof upload & { _count: { records: number } })._count.records} employees ·{" "}
                     {formatDateTime(upload.createdAt)}
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-3 ml-4 shrink-0">
                   <UploadStatusBadge status={upload.status} />
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
                 </div>
               </Link>
             ))}
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
         )}
 
         {recentUploads.length > 0 && (
-          <div className="px-6 py-3 border-t border-slate-100">
+          <div className="px-6 py-3 border-t border-slate-800">
             <Link
               href="/history"
               className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"

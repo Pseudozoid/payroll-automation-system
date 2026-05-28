@@ -68,8 +68,8 @@ export default async function HistoryPage() {
   return (
     <div className="max-w-5xl space-y-8">
       <div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">History</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-xl font-bold text-slate-100 tracking-tight">History</h1>
+        <p className="text-sm text-slate-400 mt-1">
           All payroll uploads and email dispatch records.
         </p>
       </div>
@@ -95,18 +95,18 @@ export default async function HistoryPage() {
               }
             />
           ) : (
-            <div className="divide-y divide-slate-50">
+            <div className="divide-y divide-slate-800">
               {uploads.map((upload: typeof uploads[0]) => (
                 <Link
                   key={upload.id}
                   href={`/payroll/${upload.id}`}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-800/70 transition-colors group"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">
+                    <p className="text-sm font-medium text-slate-100 truncate">
                       {upload.fileName}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       {formatMonth(upload.month, upload.year)} ·{" "}
                       {(upload as typeof upload & { _count: { records: number } })._count.records} employees ·{" "}
                       Uploaded {formatDateTime(upload.createdAt)}
@@ -114,7 +114,7 @@ export default async function HistoryPage() {
                   </div>
                   <div className="flex items-center gap-3 ml-4 shrink-0">
                     <UploadStatusBadge status={upload.status} />
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
                   </div>
                 </Link>
               ))}
@@ -152,24 +152,24 @@ export default async function HistoryPage() {
                   {emailLogs.map((log: typeof emailLogs[0]) => (
                     <tr key={log.id}>
                       <td>
-                        <div className="font-medium text-slate-800">
+                        <div className="font-medium text-slate-100">
                           {log.slip.record.name}
                         </div>
-                        <div className="text-xs text-slate-400 font-mono">
+                        <div className="text-xs text-slate-500 font-mono">
                           {log.slip.record.employeeCode}
                         </div>
                       </td>
-                      <td className="text-sm text-slate-600">
+                      <td className="text-sm text-slate-300">
                         {formatMonth(log.slip.record.month, log.slip.record.year)}
                       </td>
-                      <td className="text-sm text-slate-600">{log.sentTo}</td>
+                      <td className="text-sm text-slate-300">{log.sentTo}</td>
                       <td className="text-right font-medium text-sm">
                         {formatINR(log.slip.record.netSalary)}
                       </td>
                       <td className="text-center">
                         <EmailStatusBadge status={log.status} />
                       </td>
-                      <td className="text-sm text-slate-500">
+                      <td className="text-sm text-slate-400">
                         {log.sentAt
                           ? formatDateTime(log.sentAt)
                           : log.errorMsg
