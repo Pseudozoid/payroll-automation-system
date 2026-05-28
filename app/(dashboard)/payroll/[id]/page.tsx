@@ -86,7 +86,6 @@ export default function PayrollDetailPage() {
     setGenerateState({ state: "loading" });
     try {
       const settings = loadPdfSettings();
-      console.debug("[generate] using PDF settings:", settings);
       const res = await fetch("/api/salary-slips/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

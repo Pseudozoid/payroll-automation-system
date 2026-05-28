@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bell } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 
 const ROUTE_LABELS: Record<string, string> = {

@@ -15,9 +15,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { uploadId, settings } = schema.parse(body);
     const pdfSettings = parsePdfSettings(settings);
-    // Debug: log received settings to server console to verify changes are applied
-    // (temporary; will remove after verification)
-    console.debug("[api/salary-slips/generate] pdfSettings:", pdfSettings);
 
     const upload = await prisma.payrollUpload.findUnique({
       where: { id: uploadId },
