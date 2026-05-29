@@ -5,7 +5,7 @@
  */
 
 import nodemailer from "nodemailer";
-import Resend from "resend";
+import { Resend } from "resend";
 import { formatINR, formatMonth } from "./utils";
 
 function createTransporter() {
@@ -125,7 +125,7 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
 
   // Prefer Resend SDK if configured. Keep the existing Nodemailer SMTP path as a fallback.
   const resendClient = process.env.RESEND_API_KEY
-    ? new Resend({ apiKey: process.env.RESEND_API_KEY })
+    ? new Resend(process.env.RESEND_API_KEY)
     : null;
 
   if (resendClient) {
@@ -143,9 +143,9 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
       }),
       attachments: [
         {
-          name: params.pdfFileName,
-          data: Buffer.from(params.pdfBase64, "base64"),
-          type: "application/pdf",
+          filename: params.pdfFileName,
+          content: params.pdfBase64,
+          contentType: "application/pdf",
         },
       ],
     });
