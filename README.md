@@ -1,6 +1,6 @@
 # Payroll Automation System 📄
 
-Payroll Automation System is a Next.js (App Router + TypeScript) application to ingest payroll CSV/XLSX files, generate PDF salary slips, and dispatch them to employees via email.
+Payroll Automation System is a Next.js (App Router + TypeScript) application to ingest payroll CSV/XLSX files, generate password-protected PDF salary slips, and dispatch them to employees via email.
 
 ## 🚀 Live Demo
 
@@ -28,13 +28,14 @@ The application is deployed and available for evaluation:
 - **Styling:** Tailwind CSS / PostCSS
 - **Email:** Nodemailer (SMTP)
 - **CSV / XLSX parsing:** PapaParse, xlsx
-- **PDF generation:** pdf-lib
+- **PDF generation:** pdf-lib-plus-encrypt
 - **Validation:** Zod
 
 ## Key features
 - Upload CSV / Excel payroll files (bulk employee salary rows)
 - Validate and preview parsed rows before processing
 - Generate per-employee PDF salary slips
+- Encrypt salary slip PDFs with the employee ID as the open password
 - Send salary slips by email
 - Bulk email dispatch with per-recipient status tracking
 - Track upload, slip and email statuses in the database
@@ -57,6 +58,7 @@ Follow this flow to evaluate the app quickly. Each step maps to pages in the das
 3. Generate PDFs
 	- After import, open the payroll upload details or the Payroll list to generate salary slips for imported rows.
 	- The system uses your Branding settings (company name, address) to populate the PDF.
+	- Each generated PDF is password protected. The password is the employee's ID.
 
 4. Edit PDF / Branding settings (IMPORTANT)
 	- To change the company name, address, or other branding options, go to **Settings → Branding** and update the fields.
@@ -66,6 +68,7 @@ Follow this flow to evaluate the app quickly. Each step maps to pages in the das
 	- Individual send: Select the **Mail** action for the corresponding employee from the Upload detail view.
 	- Bulk send: Use the **Send all Emails** button from the Upload detail view. The UI shows per-recipient status and records each attempt in `EmailLog`.
 	- The application uses SMTP via Nodemailer for salary slip delivery.
+	- The email body tells recipients the attachment is password protected and that the password is their Employee ID.
 
 6. Monitor history and retry
 	- Visit the **History** page to see past uploads, generated slips, and email dispatch attempts.
@@ -73,6 +76,7 @@ Follow this flow to evaluate the app quickly. Each step maps to pages in the das
 
 7. Download or view PDF
 	- Generated PDFs can be downloaded from the slip detail view for offline archiving.
+	- Use the employee ID for that slip when the PDF viewer prompts for a password.
 
 Quick evaluator checklist:
  - Visit the live demo (https://payroll-automation-system-alpha.vercel.app/) and sign in with the demo credentials (Email: `admin@example.com`, Password: `admin@1234`).
@@ -84,6 +88,7 @@ Quick evaluator checklist:
  <br>
 
  - Upload `sample-payroll.csv`, import and generate PDFs.
+ - Open a generated PDF with the employee ID from the row to verify password protection.
  - Edit Branding in Settings, then regenerate a PDF to see the change.
  - Try sending one slip to yourself (individual send) and then perform a bulk send.
  - Check the History page for send status and retry failures from the dashboard.
@@ -155,6 +160,7 @@ npm run dev
 
 ## Local email testing
 - For local testing, configure any SMTP provider (Mailtrap, Gmail SMTP with App Passwords, etc.) using the SMTP environment variables.
+- Use the employee ID from the uploaded record to open the generated PDF.
 - Restart the development server after updating SMTP configuration.
 
 ## Live testing / Deployment
@@ -173,6 +179,7 @@ npm run dev
 ## Troubleshooting
 - Startup fails with DB connection errors: verify `DATABASE_URL` and that Postgres is reachable.
 - Email sending errors: check SMTP credentials. Examine server logs for provider error messages.
+- PDF opening errors: confirm you are using the correct employee ID for the slip.
 - Auth fails: verify `ADMIN_EMAIL` and `ADMIN_PASSWORD` exist in `.env`.
 
 ## Development tips
