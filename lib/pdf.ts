@@ -1,12 +1,12 @@
 /**
- * Salary slip PDF generator using pdf-lib.
+ * Salary slip PDF generator using pdf-lib-plus-encrypt.
  * Produces a professional A4 slip with company header, employee details,
  * salary breakdown table, net salary highlight, and a footer.
  *
  * Uses only built-in Helvetica fonts — no external font loading needed.
  */
 
-import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib-plus-encrypt";
 import { formatMonth, formatDate } from "./utils";
 import { DEFAULT_PDF_SETTINGS, type PdfSettings } from "./pdf-settings";
 
@@ -525,5 +525,9 @@ export async function generateSalarySlipPdf(
     });
   }
 
-  return doc.save();
+  await doc.encrypt({
+    userPassword: data.employeeCode,
+  });
+
+  return await doc.save({ useObjectStreams: false });
 }
