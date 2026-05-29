@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Admin dashboard for generating and dispatching employee payroll slips via email.",
   icons: {
-    icon: '/favicon.svg',
+    icon: "/icon.svg",
   },
 };
 
