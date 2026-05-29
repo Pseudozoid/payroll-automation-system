@@ -75,12 +75,12 @@ Follow this flow to evaluate the app quickly. Each step maps to pages in the das
 	- Generated PDFs can be downloaded from the slip detail view for offline archiving.
 
 Quick evaluator checklist:
- - Visit the live demo (https://payroll-automation-system-alpha.vercel.app/) and sign in with the demo credentials (username: `admin@example.com`, Password: `admin@1234`).
+ - Visit the live demo (https://payroll-automation-system-alpha.vercel.app/) and sign in with the demo credentials (Email: `admin@example.com`, Password: `admin@1234`).
  
  <br>
 
  - **Optional**: Replace the sample employee email addresses with email addresses you can access. Multiple employee records may share the same email address during testing, making it easy to verify email delivery, PDF attachments, bulk dispatch functionality, and per-recipient status tracking.
- 
+
  <br>
 
  - Upload `sample-payroll.csv`, import and generate PDFs.

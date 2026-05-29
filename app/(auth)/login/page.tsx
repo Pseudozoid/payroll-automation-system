@@ -169,7 +169,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center mt-6 text-xs text-slate-500">
-          Single-admin system. Contact your IT team if you&apos;re locked out.
+          Demo Account | email: admin@example.com | password: admin@1234
         </p>
       </motion.div>
     </div>
