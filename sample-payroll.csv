@@ -1,7 +1,7 @@
 employee_id,name,email,designation,base_salary,hra,allowances,deductions,month,year
-EMP001,Aarav Sharma,aarav.sharma@example.com,Software Engineer,60000,12000,5000,3000,5,2026
-EMP002,Diya Patel,diya.patel@example.com,Product Manager,75000,15000,7000,4500,5,2026
-EMP003,Rohan Verma,rohan.verma@example.com,QA Analyst,48000,9000,3500,2000,5,2026
-EMP004,Meera Nair,meera.nair@example.com,HR Executive,42000,8000,2500,1500,5,2026
-EMP005,Kabir Singh,kabir.singh@example.com,Finance Associate,53000,10000,4000,2500,5,2026
-EMP006,Isha Gupta,isha.gupta@example.com,UI Designer,51000,9500,3200,1800,5,2026
+EMP001,Sarath Madhav,sarathmadhavr@gmail.com,Software Engineer,35000,7000,3000,1800,5,2026
+EMP002,John Doe,pseudoneutral69@gmail.com,Product Manager,55000,11000,5000,3200,5,2026
+EMP003,Rohan Verma,rohan.verma@example.com,QA Analyst,30000,6000,2500,1500,5,2026
+EMP004,Meera Nair,meera.nair@example.com,HR Executive,28000,5500,2000,1200,5,2026
+EMP005,David Paul,david.paul@example.com,Finance Associate,32000,6500,2500,1600,5,2026
+EMP006,Isha Gupta,isha.gupta@example.com,UI Designer,34000,6800,2800,1700,5,2026
