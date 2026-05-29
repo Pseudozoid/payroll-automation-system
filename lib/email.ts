@@ -36,11 +36,12 @@ function buildHtmlBody(params: {
   companyName: string;
   companyAddress?: string;
   name: string;
+  employeeCode: string;
   month: number;
   year: number;
   netSalary: number;
 }): string {
-  const { companyName, companyAddress, name, month, year, netSalary } = params;
+  const { companyName, companyAddress, name, employeeCode, month, year, netSalary } = params;
   const monthLabel = formatMonth(month, year);
   const netFormatted = formatINR(netSalary);
   const addressHtml = companyAddress
@@ -83,6 +84,9 @@ function buildHtmlBody(params: {
       <p style="margin:0 0 10px;color:#94a3b8;font-size:13px;line-height:1.6;">
         Your detailed salary statement is attached as a PDF to this email.
       </p>
+      <p style="margin:0 0 10px;color:#94a3b8;font-size:13px;line-height:1.6;">
+        This salary slip is password protected. Password: <strong style="color:#0f172a;">Your Employee ID (${employeeCode})</strong>.
+      </p>
       <p style="margin:0;color:#94a3b8;font-size:13px;line-height:1.6;">
         If you have any questions about your salary, please contact the HR department.
       </p>
@@ -105,6 +109,7 @@ function buildHtmlBody(params: {
 export interface SendSlipEmailParams {
   to: string;
   name: string;
+  employeeCode: string;
   month: number;
   year: number;
   netSalary: number;
@@ -137,6 +142,7 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
         companyName: params.companyName,
         companyAddress: params.companyAddress,
         name: params.name,
+        employeeCode: params.employeeCode,
         month: params.month,
         year: params.year,
         netSalary: params.netSalary,
@@ -164,6 +170,7 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
       companyName: params.companyName,
       companyAddress: params.companyAddress,
       name: params.name,
+      employeeCode: params.employeeCode,
       month: params.month,
       year: params.year,
       netSalary: params.netSalary,

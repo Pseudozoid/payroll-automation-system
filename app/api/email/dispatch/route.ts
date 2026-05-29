@@ -42,6 +42,7 @@ async function dispatchEmailForRecord(
     await sendSlipEmail({
       to: record.email,
       name: record.name,
+      employeeCode: record.employeeCode,
       month: record.month,
       year: record.year,
       netSalary: record.netSalary,
