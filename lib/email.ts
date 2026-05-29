@@ -5,6 +5,7 @@
  */
 
 import nodemailer from "nodemailer";
+import Resend from "resend";
 import { formatINR, formatMonth } from "./utils";
 
 function createTransporter() {
@@ -122,6 +123,37 @@ export async function sendSlipEmail(params: SendSlipEmailParams): Promise<void> 
   const from = process.env.SMTP_FROM ?? `"${params.companyName}" <${process.env.SMTP_USER}>`;
   const monthLabel = formatMonth(params.month, params.year);
 
+  // Prefer Resend SDK if configured. Keep the existing Nodemailer SMTP path as a fallback.
+  const resendClient = process.env.RESEND_API_KEY
+    ? new Resend({ apiKey: process.env.RESEND_API_KEY })
+    : null;
+
+  if (resendClient) {
+    await resendClient.emails.send({
+      from,
+      to: params.to,
+      subject: `Your Salary Slip for ${monthLabel} — ${params.companyName}`,
+      html: buildHtmlBody({
+        companyName: params.companyName,
+        companyAddress: params.companyAddress,
+        name: params.name,
+        month: params.month,
+        year: params.year,
+        netSalary: params.netSalary,
+      }),
+      attachments: [
+        {
+          name: params.pdfFileName,
+          data: Buffer.from(params.pdfBase64, "base64"),
+          type: "application/pdf",
+        },
+      ],
+    });
+
+    return;
+  }
+
+  // Fallback: use Nodemailer SMTP transport
   const transporter = createTransporter();
 
   await transporter.sendMail({
