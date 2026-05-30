@@ -33,21 +33,44 @@ interface EmailLogRecord {
 }
 
 export default async function HistoryPage() {
-  let uploads: Awaited<ReturnType<typeof prisma.payrollUpload.findMany>> = [];
+  let uploads: {
+    id: string;
+    fileName: string;
+    month: number;
+    year: number;
+    status: "PENDING" | "PROCESSING" | "DONE" | "FAILED";
+    createdAt: Date;
+    _count: { records: number };
+  }[] = [];
   let emailLogs: EmailLogRecord[] = [];
 
   try {
     [uploads, emailLogs] = await Promise.all([
       prisma.payrollUpload.findMany({
         orderBy: { createdAt: "desc" },
-        include: { _count: { select: { records: true } } },
+        select: {
+          id: true,
+          fileName: true,
+          month: true,
+          year: true,
+          status: true,
+          createdAt: true,
+          _count: { select: { records: true } },
+        },
       }),
       prisma.emailLog.findMany({
         orderBy: { createdAt: "desc" },
         take: 50,
-        include: {
+        select: {
+          id: true,
+          slipId: true,
+          sentTo: true,
+          status: true,
+          errorMsg: true,
+          sentAt: true,
+          createdAt: true,
           slip: {
-            include: {
+            select: {
               record: {
                 select: {
                   name: true,

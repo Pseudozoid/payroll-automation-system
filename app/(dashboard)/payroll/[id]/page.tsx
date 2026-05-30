@@ -73,11 +73,9 @@ export default function PayrollDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    queueMicrotask(() => {
       void fetchUpload();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
+    });
   }, [fetchUpload]);
 
   // ─── Generate PDFs ──────────────────────────────────────────────────────────

@@ -25,15 +25,12 @@ export function Sidebar() {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      syncDashboardHref();
-    }, 0);
+    queueMicrotask(syncDashboardHref);
 
     window.addEventListener("salary-slip-dashboard-selection-changed", syncDashboardHref);
     window.addEventListener("storage", syncDashboardHref);
 
     return () => {
-      window.clearTimeout(timer);
       window.removeEventListener("salary-slip-dashboard-selection-changed", syncDashboardHref);
       window.removeEventListener("storage", syncDashboardHref);
     };

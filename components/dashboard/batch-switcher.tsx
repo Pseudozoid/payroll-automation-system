@@ -32,8 +32,6 @@ type SalaryRecord = {
   id: string;
   employeeCode: string;
   name: string;
-  email: string;
-  designation: string;
   month: number;
   year: number;
   salarySlip: SalarySlip | null;
@@ -161,11 +159,10 @@ export function BatchSwitcher({
     const storedUploadId = window.localStorage.getItem(SELECTED_UPLOAD_STORAGE_KEY);
 
     if (storedUploadId && storedUploadId !== initialUpload.id) {
-      const restoreTimer = window.setTimeout(() => {
+      queueMicrotask(() => {
         void loadUpload(storedUploadId, { silent: true });
-      }, 0);
-
-      return () => window.clearTimeout(restoreTimer);
+      });
+      return;
     }
 
     window.localStorage.setItem(SELECTED_UPLOAD_STORAGE_KEY, initialUpload.id);
