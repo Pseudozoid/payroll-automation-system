@@ -27,9 +27,6 @@ The application is deployed and available at:
 - **Database / ORM:** PostgreSQL + Prisma
 - **Styling:** Tailwind CSS / PostCSS
 - **Email:** Nodemailer (SMTP)
-- **CSV / XLSX parsing:** PapaParse, xlsx
-- **PDF generation:** pdf-lib-plus-encrypt
-- **Validation:** Zod
 
 ## Key features
 - Upload CSV / Excel payroll files (bulk employee salary rows)
@@ -125,11 +122,6 @@ npm run dev
 - For local testing, configure any SMTP provider (Mailtrap, Gmail SMTP with App Passwords, etc.) using the SMTP environment variables.
 - Use the employee ID from the uploaded record to open the generated PDF.
 - Restart the development server after updating SMTP configuration.
-
-## Live testing / Deployment
-- Recommended: Deploy to Vercel. Configure DATABASE_URL, SMTP_*, ADMIN_EMAIL, and ADMIN_PASSWORD in the Vercel environment variables before deployment.
-- Build & start commands are handled by Vercel (the repo's `build` script runs `prisma generate && next build`).
-- If using a custom server or Docker, build the Next app and run `npm run start` after setting env variables.
 
 ## Database & Prisma notes
 - Prisma's schema is at `prisma/schema.prisma`. The app expects a PostgreSQL datasource.
