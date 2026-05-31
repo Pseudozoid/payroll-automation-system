@@ -56,6 +56,9 @@ Quick evaluator checklist:
  - Edit Branding in Settings, then regenerate a PDF to see the change.
  - Try sending one slip to yourself (individual send) and then perform a bulk send.
  - Check the History page for send status and retry failures from the dashboard.
+
+## Samples & testing data
+- `sample-payroll.csv` is included for providing the expected payroll format and for quick manual testing. Use the Upload page to preview and import it.
  
 ## Prerequisites
 - Node.js 18+ and npm / pnpm
@@ -132,9 +135,6 @@ npm run dev
 - Prisma's schema is at `prisma/schema.prisma`. The app expects a PostgreSQL datasource.
 - Client is generated into `app/generated/prisma` by the `prisma generate` step.
 - There are no checked-in migrations by default — run `npx prisma migrate dev` to create migrations for your database.
-
-## Samples & testing data
-- `sample-payroll.csv` is included for providing the expected payroll format and for quick manual testing. Use the Upload page to preview and import it.
 
 ## Troubleshooting
 - Startup fails with DB connection errors: verify `DATABASE_URL` and that Postgres is reachable.
