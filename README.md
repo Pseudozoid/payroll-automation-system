@@ -36,12 +36,13 @@ The application is deployed and available at:
 (Quick evaluator checklist):
 
 1. Sign in using the demo credentials.
-2. Upload CSV/Excel payroll file with the format given in `sample-payroll.csv`
-3. Generate salary slip PDFs.
-4. Verify PDF password protection using the employee ID.
-5. Update branding settings and **regenerate** a PDF.
-6. Send salary slips individually or in bulk.
-7. Review delivery status in the History page.
+2. **Optional:** Replace the sample employee email addresses with email addresses you can access. Multiple employees may use the same email address during testing to verify email delivery, PDF attachments, bulk dispatch, and status tracking.
+3. Upload CSV/Excel payroll file with the format given in `sample-payroll.csv`
+4. Generate salary slip PDFs.
+5. Verify PDF password protection using the employee ID.
+6. Update branding settings and **regenerate** a PDF.
+7. Send salary slips individually or in bulk.
+8. Review delivery status in the History page.
 
 ## Sample data
 - `sample-payroll.csv` is included for providing the expected payroll format and for quick manual testing. Use the Upload page to preview and import it.
